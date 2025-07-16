@@ -20,12 +20,28 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
   const user = await prisma.user.findUnique({
     where: { id: params.id },
     include: {
-      client: true
+      client: {
+        include: {
+          plan: true
+        }
+      }
     }
   })
 
   if (!user) {
     notFound()
+  }
+
+  // Transform data to match UserForm expected structure
+  const formData = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    client: user.client ? {
+      id: user.client.id,
+      name: user.client.name,
+      plan: user.client.plan?.name || 'Sin plan'
+    } : null
   }
 
   return (
@@ -40,7 +56,7 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
       </div>
 
       <div className="card max-w-2xl">
-        <UserForm initialData={user} />
+        <UserForm initialData={formData} />
       </div>
     </div>
   )
