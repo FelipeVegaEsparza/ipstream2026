@@ -1,0 +1,238 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("CLIENT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relación con cliente
+  client Client?
+
+  @@map("users")
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  name      String
+  planId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            Plan?            @relation(fields: [planId], references: [id])
+  subscription    Subscription?
+  basicData       BasicData?
+  socialNetworks  SocialNetworks?
+  programs        Program[]
+  news            News[]
+  rankingVideos   RankingVideo[]
+  sponsors        Sponsor[]
+  promotions      Promotion[]
+  payments        Payment[]
+
+  @@map("clients")
+}
+
+model BasicData {
+  id                String   @id @default(cuid())
+  clientId          String   @unique
+  projectName       String
+  projectDescription String
+  logoUrl           String?
+  coverUrl          String?
+  radioStreamingUrl String?
+  videoStreamingUrl String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("basic_data")
+}
+
+model SocialNetworks {
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  facebook  String?
+  youtube   String?
+  instagram String?
+  tiktok    String?
+  whatsapp  String?
+  x         String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("social_networks")
+}
+
+model Program {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  imageUrl    String?
+  description String
+  startTime   String   // Format: "HH:MM"
+  endTime     String   // Format: "HH:MM"
+  weekDays    String   // JSON array: ["monday", "tuesday", ...]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("programs")
+}
+
+model News {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  slug        String
+  shortText   String
+  longText    String
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, slug])
+  @@map("news")
+}
+
+model RankingVideo {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  videoUrl    String
+  description String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("ranking_videos")
+}
+
+model Sponsor {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  logoUrl     String?
+  address     String?
+  description String
+  facebook    String?
+  youtube     String?
+  instagram   String?
+  tiktok      String?
+  whatsapp    String?
+  x           String?
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("sponsors")
+}
+
+model Promotion {
+  id          String   @id @default(cuid())
+  clientId    String
+  title       String
+  description String
+  imageUrl    String?
+  link        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("promotions")
+}
+
+// Modelos para sistema de pagos y planes
+model Plan {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  price       Float
+  currency    String   @default("CLP")
+  interval    String   // "monthly" | "yearly"
+  features    String   // JSON array de características
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  clients       Client[]
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id              String   @id @default(cuid())
+  clientId        String   @unique
+  planId          String
+  status          String   // "active" | "cancelled" | "expired" | "pending"
+  startDate       DateTime
+  endDate         DateTime
+  autoRenew       Boolean  @default(true)
+  cancelledAt     DateTime?
+  cancellationReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  client   Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  clientId       String
+  subscriptionId String?
+  amount         Float
+  currency       String   @default("CLP")
+  status         String   // "pending" | "completed" | "failed" | "refunded"
+  paymentMethod  String   // "credit_card" | "bank_transfer" | "paypal" | "other"
+  transactionId  String?
+  description    String?
+  paidAt         DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relaciones
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
+}
+
+// Role values: "ADMIN" | "CLIENT"
+// Plan intervals: "monthly" | "yearly"
+// Subscription status: "active" | "cancelled" | "expired" | "pending"
+// Payment status: "pending" | "completed" | "failed" | "refunded"
+// Payment methods: "credit_card" | "bank_transfer" | "paypal" | "other"
