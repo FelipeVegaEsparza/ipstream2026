@@ -13,18 +13,35 @@ export function sanitizeText(text: string): string {
     // Reemplazar comillas curvas por comillas normales
     .replace(/[""]/g, '"')
     .replace(/['']/g, "'")
+    .replace(/[‚„]/g, ',')
+    .replace(/[‹›]/g, "'")
+    .replace(/[«»]/g, '"')
     
     // Reemplazar guiones largos por guiones normales
     .replace(/[—–]/g, '-')
+    .replace(/[‒]/g, '-')
     
     // Reemplazar espacios especiales por espacios normales
-    .replace(/[\u00A0\u2000-\u200B\u2028\u2029]/g, ' ')
+    .replace(/[\u00A0\u1680\u2000-\u200B\u2028\u2029\u202F\u205F\u3000]/g, ' ')
     
-    // Eliminar caracteres de control invisibles (excepto \n, \r, \t)
+    // Eliminar caracteres de control invisibles y problemáticos
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
+    .replace(/[\uFEFF\uFFFE\uFFFF]/g, '') // BOM y otros caracteres problemáticos
+    .replace(/[\u200C\u200D\u200E\u200F]/g, '') // Caracteres de dirección de texto
+    .replace(/[\u2060-\u206F]/g, '') // Caracteres de formato
     
-    // Reemplazar múltiples espacios por uno solo
-    .replace(/\s+/g, ' ')
+    // Reemplazar caracteres especiales de puntuación
+    .replace(/[…]/g, '...')
+    .replace(/[•]/g, '*')
+    .replace(/[·]/g, '*')
+    
+    // Limpiar saltos de línea problemáticos
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    
+    // Reemplazar múltiples espacios y saltos de línea
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*\n\s*\n/g, '\n\n') // Máximo 2 saltos de línea consecutivos
     
     // Eliminar espacios al inicio y final
     .trim();

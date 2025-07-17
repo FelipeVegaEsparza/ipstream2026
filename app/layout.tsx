@@ -20,6 +20,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <DirectoryInitializer />
         {children}
+        {/* Script global para sanitizar texto pegado */}
+        <script src="/text-sanitizer.js" async></script>
       </body>
     </html>
   )
