@@ -51,7 +51,24 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt'
   },
+  pages: {
+    signIn: '/auth/login',
+    signOut: '/auth/login',
+    error: '/auth/login',
+  },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Si la URL es relativa, usar baseUrl
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`
+      }
+      // Si la URL es del mismo origen, permitirla
+      else if (new URL(url).origin === baseUrl) {
+        return url
+      }
+      // Por defecto, redirigir al baseUrl
+      return baseUrl
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role
@@ -96,8 +113,5 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     }
-  },
-  pages: {
-    signIn: '/auth/login',
   }
 }
