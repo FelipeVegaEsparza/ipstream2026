@@ -26,9 +26,57 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📰 Request body keys:', Object.keys(body))
     
+    // Debug: Log raw body first
+    console.log('📰 Raw body sample:', {
+      name: body.name?.substring(0, 50) + '...',
+      shortText: body.shortText?.substring(0, 50) + '...',
+      longText: body.longText?.substring(0, 50) + '...'
+    })
+
+    // Analyze problematic characters in the raw text
+    const analyzeTextForProblems = (text) => {
+      if (!text) return [];
+      const problems = [];
+      for (let i = 0; i < text.length; i++) {
+        const code = text.charCodeAt(i);
+        if (code < 32 && code !== 9 && code !== 10 && code !== 13) {
+          problems.push({ char: text[i], code, position: i });
+        }
+      }
+      return problems;
+    };
+
+    if (body.name) {
+      const problems = analyzeTextForProblems(body.name);
+      if (problems.length > 0) {
+        console.log('📰 Problematic chars in name:', problems);
+      }
+    }
+
+    if (body.shortText) {
+      const problems = analyzeTextForProblems(body.shortText);
+      if (problems.length > 0) {
+        console.log('📰 Problematic chars in shortText:', problems);
+      }
+    }
+
+    if (body.longText) {
+      const problems = analyzeTextForProblems(body.longText);
+      if (problems.length > 0) {
+        console.log('📰 Problematic chars in longText:', problems);
+      }
+    }
+
     // Sanitizar el texto antes de validar
     const sanitizedBody = sanitizeObject(body)
     console.log('📰 Text sanitized')
+    
+    // Debug: Log sanitized body sample
+    console.log('📰 Sanitized body sample:', {
+      name: sanitizedBody.name?.substring(0, 50) + '...',
+      shortText: sanitizedBody.shortText?.substring(0, 50) + '...',
+      longText: sanitizedBody.longText?.substring(0, 50) + '...'
+    })
     
     // Validar campos de texto críticos
     if (sanitizedBody.name) {
@@ -63,8 +111,21 @@ export async function POST(request: NextRequest) {
         )
       }
     }
+
+    // Try to parse with Zod
+    console.log('📰 Attempting Zod validation...')
+    let data;
+    try {
+      data = newsSchema.parse(sanitizedBody)
+      console.log('📰 Zod validation successful')
+    } catch (zodError) {
+      console.log('📰 Zod validation failed:', zodError)
+      return NextResponse.json(
+        { error: 'Error de validación: ' + zodError.message },
+        { status: 400 }
+      )
+    }
     
-    const data = newsSchema.parse(sanitizedBody)
     console.log('📰 Validated data keys:', Object.keys(data))
 
     // Verificar que el slug no exista para este cliente

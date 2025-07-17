@@ -6,13 +6,41 @@
 (function() {
   'use strict';
 
-  // Función de sanitización (versión JavaScript pura)
+  // Función para analizar caracteres problemáticos
+  function analyzeText(text) {
+    const problematicChars = [];
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const code = char.charCodeAt(0);
+      
+      // Detectar caracteres problemáticos
+      if (code < 32 && code !== 9 && code !== 10 && code !== 13) {
+        problematicChars.push({ char, code, position: i, type: 'control' });
+      } else if (code > 127 && code < 160) {
+        problematicChars.push({ char, code, position: i, type: 'extended-control' });
+      } else if (code >= 8192 && code <= 8303) {
+        problematicChars.push({ char, code, position: i, type: 'unicode-space' });
+      } else if (code >= 65279 && code <= 65535) {
+        problematicChars.push({ char, code, position: i, type: 'unicode-special' });
+      }
+    }
+    return problematicChars;
+  }
+
+  // Función de sanitización más agresiva
   function sanitizeText(text) {
     if (!text || typeof text !== 'string') {
       return '';
     }
 
-    return text
+    console.log('🔍 Analyzing text before sanitization...');
+    const problematicChars = analyzeText(text);
+    if (problematicChars.length > 0) {
+      console.log('⚠️ Found problematic characters:', problematicChars);
+    }
+
+    // Sanitización más agresiva - solo permitir caracteres seguros
+    let sanitized = text
       // Normalizar Unicode
       .normalize('NFKC')
       
@@ -49,6 +77,13 @@
       
       // Trim
       .trim();
+
+    // Sanitización final más agresiva - solo caracteres ASCII básicos + acentos comunes
+    sanitized = sanitized.replace(/[^\x20-\x7E\u00C0-\u00FF\u0100-\u017F\n\r\t]/g, '');
+
+    console.log('🧹 Sanitization complete. Removed', text.length - sanitized.length, 'characters');
+    
+    return sanitized;
   }
 
   // Función para manejar el evento paste
@@ -108,5 +143,8 @@
   } else {
     initTextSanitizer();
   }
+
+  // Log para confirmar que el script se cargó
+  console.log('🧹 Text sanitizer script loaded successfully');
 
 })();
