@@ -8,13 +8,18 @@ export async function GET(
   { params }: { params: { path: string[] } }
 ) {
   try {
+    console.log('Serving file request for path:', params.path)
+    
     const filePath = join(process.cwd(), 'public', 'uploads', ...params.path)
+    console.log('Full file path:', filePath)
     
     if (!existsSync(filePath)) {
+      console.log('File not found:', filePath)
       return new NextResponse('File not found', { status: 404 })
     }
 
     const file = await readFile(filePath)
+    console.log('File read successfully, size:', file.length)
     
     // Determinar el tipo de contenido basado en la extensión
     const extension = params.path[params.path.length - 1].split('.').pop()?.toLowerCase()
@@ -35,6 +40,8 @@ export async function GET(
         contentType = 'image/webp'
         break
     }
+
+    console.log('Content type:', contentType)
 
     return new NextResponse(file, {
       headers: {

@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
     // Guardar archivo
     await writeFile(filePath, buffer)
 
-    // Retornar URL pública
-    const publicUrl = `/uploads/${session.user.clientId}/${fileName}`
+    // Retornar URL pública que apunta a nuestra API
+    const publicUrl = `/api/uploads/${session.user.clientId}/${fileName}`
 
     return NextResponse.json({
       url: publicUrl,

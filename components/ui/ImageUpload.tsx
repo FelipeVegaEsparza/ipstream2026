@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import { normalizeImageUrl, getStorageImageUrl } from '@/lib/image-url-helper'
 
 interface ImageUploadProps {
   value?: string
@@ -87,9 +88,10 @@ export function ImageUpload({
     e.stopPropagation()
     
     // Si es una imagen subida al servidor, intentar eliminarla
-    if (value?.startsWith('/uploads/')) {
+    const storageUrl = getStorageImageUrl(value)
+    if (storageUrl?.startsWith('/uploads/')) {
       try {
-        const fileName = value.split('/').pop()
+        const fileName = storageUrl.split('/').pop()
         if (fileName) {
           await fetch(`/api/upload/delete?file=${fileName}`, {
             method: 'DELETE',
@@ -159,7 +161,7 @@ export function ImageUpload({
           <div className="relative">
             <div className="relative w-full max-w-md mx-auto">
               <Image
-                src={value.startsWith('/uploads/') ? `/api${value}` : value}
+                src={normalizeImageUrl(value)}
                 alt="Vista previa"
                 width={400}
                 height={200}
