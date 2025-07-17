@@ -2,6 +2,16 @@
 const nextConfig = {
   images: {
     domains: ['localhost', 'uploadthing.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
+    ],
   },
   // Temporarily disable TypeScript errors during build
   typescript: {

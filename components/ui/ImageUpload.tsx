@@ -159,7 +159,7 @@ export function ImageUpload({
           <div className="relative">
             <div className="relative w-full max-w-md mx-auto">
               <Image
-                src={value}
+                src={value.startsWith('/uploads/') ? `/api${value}` : value}
                 alt="Vista previa"
                 width={400}
                 height={200}
