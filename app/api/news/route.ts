@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { newsSchema } from '@/lib/validations'
 import { getEffectiveClientFromRequest } from '@/lib/getEffectiveClient'
+import { sanitizeObject, validateText } from '@/lib/text-sanitizer'
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +26,45 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📰 Request body keys:', Object.keys(body))
     
-    const data = newsSchema.parse(body)
+    // Sanitizar el texto antes de validar
+    const sanitizedBody = sanitizeObject(body)
+    console.log('📰 Text sanitized')
+    
+    // Validar campos de texto críticos
+    if (sanitizedBody.name) {
+      const nameValidation = validateText(sanitizedBody.name)
+      if (!nameValidation.isValid) {
+        console.log('📰 Invalid name text:', nameValidation.error)
+        return NextResponse.json(
+          { error: `Título inválido: ${nameValidation.error}` },
+          { status: 400 }
+        )
+      }
+    }
+    
+    if (sanitizedBody.shortText) {
+      const shortTextValidation = validateText(sanitizedBody.shortText)
+      if (!shortTextValidation.isValid) {
+        console.log('📰 Invalid shortText:', shortTextValidation.error)
+        return NextResponse.json(
+          { error: `Texto corto inválido: ${shortTextValidation.error}` },
+          { status: 400 }
+        )
+      }
+    }
+    
+    if (sanitizedBody.longText) {
+      const longTextValidation = validateText(sanitizedBody.longText)
+      if (!longTextValidation.isValid) {
+        console.log('📰 Invalid longText:', longTextValidation.error)
+        return NextResponse.json(
+          { error: `Texto largo inválido: ${longTextValidation.error}` },
+          { status: 400 }
+        )
+      }
+    }
+    
+    const data = newsSchema.parse(sanitizedBody)
     console.log('📰 Validated data keys:', Object.keys(data))
 
     // Verificar que el slug no exista para este cliente

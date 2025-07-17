@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { rankingVideoSchema } from '@/lib/validations'
 import { getEffectiveClientFromRequest } from '@/lib/getEffectiveClient'
+import { sanitizeObject, validateText } from '@/lib/text-sanitizer'
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +26,34 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('🎵 Request body keys:', Object.keys(body))
     
-    const data = rankingVideoSchema.parse(body)
+    // Sanitizar el texto antes de validar
+    const sanitizedBody = sanitizeObject(body)
+    console.log('🎵 Text sanitized')
+    
+    // Validar campos de texto críticos
+    if (sanitizedBody.name) {
+      const nameValidation = validateText(sanitizedBody.name)
+      if (!nameValidation.isValid) {
+        console.log('🎵 Invalid name text:', nameValidation.error)
+        return NextResponse.json(
+          { error: `Nombre del video inválido: ${nameValidation.error}` },
+          { status: 400 }
+        )
+      }
+    }
+    
+    if (sanitizedBody.description) {
+      const descValidation = validateText(sanitizedBody.description)
+      if (!descValidation.isValid) {
+        console.log('🎵 Invalid description:', descValidation.error)
+        return NextResponse.json(
+          { error: `Descripción inválida: ${descValidation.error}` },
+          { status: 400 }
+        )
+      }
+    }
+    
+    const data = rankingVideoSchema.parse(sanitizedBody)
     console.log('🎵 Validated data keys:', Object.keys(data))
 
     // Obtener el siguiente número de orden
