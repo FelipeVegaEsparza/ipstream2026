@@ -53,7 +53,7 @@ model BasicData {
   id                String   @id @default(cuid())
   clientId          String   @unique
   projectName       String
-  projectDescription String
+  projectDescription String  @db.Text
   logoUrl           String?
   coverUrl          String?
   radioStreamingUrl String?
@@ -88,7 +88,7 @@ model Program {
   clientId    String
   name        String
   imageUrl    String?
-  description String
+  description String   @db.Text
   startTime   String   // Format: "HH:MM"
   endTime     String   // Format: "HH:MM"
   weekDays    String   // JSON array: ["monday", "tuesday", ...]
@@ -105,8 +105,8 @@ model News {
   clientId    String
   name        String
   slug        String
-  shortText   String
-  longText    String
+  shortText   String   @db.Text
+  longText    String   @db.LongText
   imageUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -122,7 +122,7 @@ model RankingVideo {
   clientId    String
   name        String
   videoUrl    String
-  description String
+  description String   @db.Text
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -138,7 +138,7 @@ model Sponsor {
   name        String
   logoUrl     String?
   address     String?
-  description String
+  description String   @db.Text
   facebook    String?
   youtube     String?
   instagram   String?
@@ -158,7 +158,7 @@ model Promotion {
   id          String   @id @default(cuid())
   clientId    String
   title       String
-  description String
+  description String   @db.Text
   imageUrl    String?
   link        String?
   createdAt   DateTime @default(now())
@@ -173,11 +173,11 @@ model Promotion {
 model Plan {
   id          String   @id @default(cuid())
   name        String   @unique
-  description String
+  description String   @db.Text
   price       Float
   currency    String   @default("CLP")
   interval    String   // "monthly" | "yearly"
-  features    String   // JSON array de características
+  features    String   @db.Text // JSON array de características
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
