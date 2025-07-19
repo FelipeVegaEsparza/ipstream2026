@@ -89,6 +89,20 @@ Retorna todos los datos del cliente en una sola respuesta, incluyendo informaci�
       "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/promo.jpg",
       "link": "https://enlace-promocion.com"
     }
+  ],
+  "podcasts": [
+    {
+      "id": "podcast123",
+      "title": "Episodio 1 - Introducción",
+      "description": "Primer episodio de nuestro podcast",
+      "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast.jpg",
+      "audioUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode1.mp3",
+      "videoUrl": null,
+      "fileType": "audio",
+      "duration": "45:30",
+      "episodeNumber": 1,
+      "season": "Temporada 1"
+    }
   ]
 }
 ```
@@ -292,7 +306,89 @@ Retorna todas las promociones activas.
 
 ---
 
-### 9. Redes Sociales
+### 9. Podcasts
+**Endpoint**: `GET /api/public/[clientId]/podcasts`
+
+Retorna todos los episodios de podcast/videocast con paginación, ordenados por número de episodio y fecha de creación.
+
+**Parámetros de Query**:
+- `page` (opcional): Número de página (default: 1)
+- `limit` (opcional): Cantidad de episodios por página (default: 10)
+
+**Ejemplo de Respuesta**:
+```json
+{
+  "data": [
+    {
+      "id": "podcast123",
+      "title": "Episodio 5 - Entrevista Especial",
+      "description": "En este episodio conversamos con un invitado muy especial sobre los últimos acontecimientos en la música local",
+      "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast5.jpg",
+      "audioUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode5.mp3",
+      "videoUrl": null,
+      "fileType": "audio",
+      "duration": "52:15",
+      "episodeNumber": 5,
+      "season": "Temporada 1",
+      "createdAt": "2025-01-16T14:30:00.000Z",
+      "updatedAt": "2025-01-16T14:30:00.000Z"
+    },
+    {
+      "id": "podcast124",
+      "title": "Episodio 4 - Música y Tecnología",
+      "description": "Exploramos cómo la tecnología está cambiando la industria musical",
+      "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast4.jpg",
+      "audioUrl": null,
+      "videoUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode4.mp4",
+      "fileType": "video",
+      "duration": "1:15:30",
+      "episodeNumber": 4,
+      "season": "Temporada 1",
+      "createdAt": "2025-01-15T16:00:00.000Z",
+      "updatedAt": "2025-01-15T16:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 15,
+    "pages": 2
+  }
+}
+```
+
+**Tipos de Archivo**: Los valores posibles para `fileType` son:
+- `"audio"` - Episodio de podcast (solo audio)
+- `"video"` - Episodio de videocast (video con audio)
+
+---
+
+### 10. Podcast Individual por ID
+**Endpoint**: `GET /api/public/[clientId]/podcasts/[id]`
+
+Retorna un episodio específico de podcast usando su ID.
+
+**Ejemplo de Respuesta**:
+```json
+{
+  "id": "podcast123",
+  "title": "Episodio 5 - Entrevista Especial",
+  "description": "En este episodio conversamos con un invitado muy especial sobre los últimos acontecimientos en la música local. Hablamos sobre las nuevas tendencias, los artistas emergentes y cómo la pandemia ha afectado la industria musical en nuestra región.",
+  "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast5.jpg",
+  "audioUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode5.mp3",
+  "videoUrl": null,
+  "fileType": "audio",
+  "duration": "52:15",
+  "episodeNumber": 5,
+  "season": "Temporada 1",
+  "createdAt": "2025-01-16T14:30:00.000Z",
+  "updatedAt": "2025-01-16T14:30:00.000Z"
+}
+```
+
+---
+
+### 11. Redes Sociales
 **Endpoint**: `GET /api/public/[clientId]/social-networks`
 
 Retorna los enlaces a las redes sociales de la radio.

@@ -27,7 +27,8 @@ export async function GET(
       news,
       videos,
       sponsors,
-      promotions
+      promotions,
+      podcasts
     ] = await Promise.all([
       prisma.basicData.findUnique({
         where: { clientId: params.clientId },
@@ -109,6 +110,27 @@ export async function GET(
           link: true,
         },
         orderBy: { createdAt: 'desc' }
+      }),
+      prisma.podcast.findMany({
+        where: { clientId: params.clientId },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          imageUrl: true,
+          audioUrl: true,
+          videoUrl: true,
+          fileType: true,
+          duration: true,
+          episodeNumber: true,
+          season: true,
+          createdAt: true,
+        },
+        orderBy: [
+          { episodeNumber: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        take: 10
       })
     ])
 
@@ -129,7 +151,8 @@ export async function GET(
       news,
       videos,
       sponsors,
-      promotions
+      promotions,
+      podcasts
     }
 
     return NextResponse.json(response)

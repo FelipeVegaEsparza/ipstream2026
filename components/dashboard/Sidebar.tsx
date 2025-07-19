@@ -15,7 +15,8 @@ import {
   Cog6ToothIcon,
   ShareIcon,
   CodeBracketIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  SpeakerWaveIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Redes Sociales', href: '/dashboard/social-networks', icon: ShareIcon },
   { name: 'Programas', href: '/dashboard/programs', icon: MicrophoneIcon },
   { name: 'Noticias', href: '/dashboard/news', icon: DocumentTextIcon },
+  { name: 'Podcast', href: '/dashboard/podcasts', icon: SpeakerWaveIcon },
   { name: 'Ranking Videos', href: '/dashboard/videos', icon: VideoCameraIcon },
   { name: 'Auspiciadores', href: '/dashboard/sponsors', icon: UserGroupIcon },
   { name: 'Promociones', href: '/dashboard/promotions', icon: MegaphoneIcon },
