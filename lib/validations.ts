@@ -69,33 +69,27 @@ export const promotionSchema = z.object({
   link: z.string().url('URL inválida').optional().or(z.literal('')),
 })
 
-// Validación para podcasts
+// Validación para podcasts (solo audio)
 export const podcastSchema = z.object({
   title: z.string().min(1, 'El título del episodio es requerido'),
   description: z.string().min(1, 'La descripción es requerida'),
   imageUrl: z.string().optional(),
   audioUrl: z.string().optional(),
-  videoUrl: z.string().optional(),
-  fileType: z.enum(['audio', 'video'], { required_error: 'Selecciona el tipo de archivo' }),
   duration: z.string().optional(),
   episodeNumber: z.number().int().positive().optional(),
   season: z.string().optional(),
-}).refine(
-  (data) => {
-    // Validar que tenga al menos un archivo (audio o video) según el tipo
-    if (data.fileType === 'audio' && !data.audioUrl) {
-      return false;
-    }
-    if (data.fileType === 'video' && !data.videoUrl) {
-      return false;
-    }
-    return true;
-  },
-  {
-    message: 'Debes subir un archivo de audio o video según el tipo seleccionado',
-    path: ['audioUrl', 'videoUrl'],
-  }
-)
+})
+
+// Validación para videocasts (solo video)
+export const videocastSchema = z.object({
+  title: z.string().min(1, 'El título del episodio es requerido'),
+  description: z.string().min(1, 'La descripción es requerida'),
+  imageUrl: z.string().optional(),
+  videoUrl: z.string().url('URL inválida').min(1, 'La URL de YouTube es requerida'),
+  duration: z.string().optional(),
+  episodeNumber: z.number().int().positive().optional(),
+  season: z.string().optional(),
+})
 
 // Validación para autenticación
 export const loginSchema = z.object({
@@ -117,5 +111,6 @@ export type RankingVideoInput = z.infer<typeof rankingVideoSchema>
 export type SponsorInput = z.infer<typeof sponsorSchema>
 export type PromotionInput = z.infer<typeof promotionSchema>
 export type PodcastInput = z.infer<typeof podcastSchema>
+export type VideocastInput = z.infer<typeof videocastSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>

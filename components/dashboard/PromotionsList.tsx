@@ -57,15 +57,15 @@ export function PromotionsList({ promotions }: PromotionsListProps) {
   if (promotions.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 mb-4">
+        <div className="text-muted mb-4">
           <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <h3 className="text-lg font-medium text-primary mb-2">
           No hay promociones
         </h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-secondary mb-4">
           Comienza creando tu primera promoción
         </p>
         <Link href="/dashboard/promotions/new" className="btn-primary">
@@ -95,10 +95,10 @@ export function PromotionsList({ promotions }: PromotionsListProps) {
           {/* Content */}
           <div className="space-y-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-bold text-primary mb-2">
                 {promotion.title}
               </h3>
-              <p className="text-gray-600 text-sm line-clamp-3">
+              <p className="text-secondary text-sm line-clamp-3">
                 {promotion.description}
               </p>
             </div>
@@ -106,45 +106,49 @@ export function PromotionsList({ promotions }: PromotionsListProps) {
             {/* Link */}
             {promotion.link && (
               <div className="flex items-center text-sm">
-                <LinkIcon className="h-4 w-4 text-gray-400 mr-2" />
+                <LinkIcon className="h-4 w-4 text-accent mr-2" />
                 <a
                   href={promotion.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-600 hover:text-primary-700 truncate"
+                  className="text-accent hover:text-cyan-300 truncate transition-colors"
                 >
                   {promotion.link}
                 </a>
               </div>
             )}
 
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-muted">
               Creado: {formatDate(promotion.createdAt)}
             </div>
             
             {/* Actions */}
-            <div className="flex justify-end space-x-2 pt-3 border-t">
+            <div className="flex justify-end space-x-2 pt-3 border-t border-gray-700">
               <Link
                 href={`/dashboard/promotions/${promotion.id}`}
-                className="p-2 text-gray-400 hover:text-blue-600"
+                className="action-button action-button-view"
                 title="Ver promoción"
               >
-                <EyeIcon className="h-5 w-5" />
+                <EyeIcon className="h-4 w-4" />
               </Link>
               <Link
                 href={`/dashboard/promotions/${promotion.id}/edit`}
-                className="p-2 text-gray-400 hover:text-primary-600"
+                className="action-button action-button-edit"
                 title="Editar promoción"
               >
-                <PencilIcon className="h-5 w-5" />
+                <PencilIcon className="h-4 w-4" />
               </Link>
               <button
                 onClick={() => handleDelete(promotion.id)}
                 disabled={loading === promotion.id}
-                className="p-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                className="action-button action-button-delete"
                 title="Eliminar promoción"
               >
-                <TrashIcon className="h-5 w-5" />
+                {loading === promotion.id ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <TrashIcon className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>

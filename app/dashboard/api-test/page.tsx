@@ -62,6 +62,16 @@ export default function ApiTestPage() {
       name: 'Promociones',
       url: `/api/public/${clientId}/promotions`,
       description: 'Lista de promociones'
+    },
+    {
+      name: 'Podcasts',
+      url: `/api/public/${clientId}/podcasts`,
+      description: 'Lista de episodios de podcast (audio)'
+    },
+    {
+      name: 'Videocasts',
+      url: `/api/public/${clientId}/videocasts`,
+      description: 'Lista de episodios de videocast (video)'
     }
   ]
 
@@ -170,6 +180,22 @@ fetch('${baseUrl}/api/public/${clientId}/news?page=1&limit=5')
   .then(response => response.json())
   .then(data => {
     console.log('Noticias:', data.data)
+    console.log('Paginación:', data.pagination)
+  })
+
+// Obtener podcasts (audio) con paginación
+fetch('${baseUrl}/api/public/${clientId}/podcasts?page=1&limit=10')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Podcasts de audio:', data.data)
+    console.log('Paginación:', data.pagination)
+  })
+
+// Obtener videocasts (video) con paginación
+fetch('${baseUrl}/api/public/${clientId}/videocasts?page=1&limit=10')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Videocasts:', data.data)
     console.log('Paginación:', data.pagination)
   })`}
           </pre>

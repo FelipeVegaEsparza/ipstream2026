@@ -27,19 +27,32 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar tipo de archivo
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    const audioTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/m4a', 'audio/aac', 'audio/ogg']
+    const videoTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/webm', 'video/quicktime']
+    
+    const allowedTypes = [...imageTypes, ...audioTypes, ...videoTypes]
+    
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, GIF, WebP)' },
+        { error: 'Tipo de archivo no permitido. Se permiten imágenes (JPG, PNG, GIF, WebP), audio (MP3, WAV, M4A, AAC) y video (MP4, MOV, AVI, WebM)' },
         { status: 400 }
       )
     }
 
-    // Validar tamaño (5MB máximo)
-    const maxSize = 5 * 1024 * 1024 // 5MB
+    // Validar tamaño según tipo de archivo
+    let maxSize = 5 * 1024 * 1024 // 5MB para imágenes por defecto
+    
+    if (audioTypes.includes(file.type)) {
+      maxSize = 100 * 1024 * 1024 // 100MB para audio
+    } else if (videoTypes.includes(file.type)) {
+      maxSize = 500 * 1024 * 1024 // 500MB para video
+    }
+    
     if (file.size > maxSize) {
+      const maxSizeMB = Math.round(maxSize / (1024 * 1024))
       return NextResponse.json(
-        { error: 'El archivo es demasiado grande. Máximo 5MB' },
+        { error: `El archivo es demasiado grande. Máximo ${maxSizeMB}MB para este tipo de archivo` },
         { status: 400 }
       )
     }

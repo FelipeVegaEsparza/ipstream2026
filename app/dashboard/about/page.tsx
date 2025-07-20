@@ -28,11 +28,15 @@ export default function AboutPage() {
               'Dashboard de administración completo',
               'Gestión de programación de radio',
               'Sistema de noticias con slugs únicos',
+              'Podcasts de audio con gestión completa',
+              'Videocasts con integración de YouTube',
               'Ranking de videos con reordenamiento',
               'Gestión completa de auspiciadores',
               'Sistema de promociones',
-              'Upload de imágenes con drag & drop',
-              'API REST pública completa'
+              'Upload de archivos multimedia',
+              'API REST pública completa',
+              'Diseño responsive y accesible',
+              'Sistema de contraste mejorado'
             ].map((feature, index) => (
               <div key={index} className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg">
                 <span className="text-green-400 mt-0.5">✓</span>
@@ -77,15 +81,17 @@ export default function AboutPage() {
           </svg>
           Módulos Disponibles
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
             { icon: '📊', name: 'Datos Básicos', desc: 'Información del proyecto', color: 'from-blue-500/20 to-blue-600/20 border-blue-500/30' },
             { icon: '📱', name: 'Redes Sociales', desc: 'Enlaces a plataformas', color: 'from-green-500/20 to-green-600/20 border-green-500/30' },
             { icon: '🎙️', name: 'Programas', desc: 'Programación de radio', color: 'from-yellow-500/20 to-yellow-600/20 border-yellow-500/30' },
             { icon: '📰', name: 'Noticias', desc: 'Sistema de noticias', color: 'from-purple-500/20 to-purple-600/20 border-purple-500/30' },
-            { icon: '🎥', name: 'Videos', desc: 'Ranking de videos', color: 'from-red-500/20 to-red-600/20 border-red-500/30' },
-            { icon: '🏢', name: 'Auspiciadores', desc: 'Gestión de sponsors', color: 'from-indigo-500/20 to-indigo-600/20 border-indigo-500/30' },
-            { icon: '🎉', name: 'Promociones', desc: 'Ofertas especiales', color: 'from-pink-500/20 to-pink-600/20 border-pink-500/30' },
+            { icon: '🎵', name: 'Podcasts', desc: 'Episodios de audio', color: 'from-indigo-500/20 to-purple-600/20 border-indigo-500/30' },
+            { icon: '🎥', name: 'Videocasts', desc: 'Episodios con YouTube', color: 'from-red-500/20 to-pink-600/20 border-red-500/30' },
+            { icon: '📺', name: 'Ranking Videos', desc: 'Top musical', color: 'from-orange-500/20 to-red-600/20 border-orange-500/30' },
+            { icon: '🏢', name: 'Auspiciadores', desc: 'Gestión de sponsors', color: 'from-teal-500/20 to-cyan-600/20 border-teal-500/30' },
+            { icon: '🎉', name: 'Promociones', desc: 'Ofertas especiales', color: 'from-pink-500/20 to-rose-600/20 border-pink-500/30' },
             { icon: '🔧', name: 'API REST', desc: 'Endpoints públicos', color: 'from-gray-500/20 to-gray-600/20 border-gray-500/30' }
           ].map((module, index) => (
             <div key={index} className={`text-center p-6 bg-gradient-to-br ${module.color} rounded-xl border backdrop-blur-sm hover:scale-105 transition-transform duration-200`}>
@@ -97,6 +103,46 @@ export default function AboutPage() {
         </div>
       </div>
 
+      <div className="card">
+        <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
+          <svg className="w-6 h-6 text-cyan-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+          </svg>
+          Novedades v1.2
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <h4 className="font-semibold text-cyan-400 mb-3">🎵 Módulos Separados</h4>
+            {[
+              'Podcasts de audio independientes',
+              'Videocasts con integración YouTube',
+              'APIs públicas específicas para cada tipo',
+              'Formularios optimizados por contenido'
+            ].map((feature, index) => (
+              <div key={index} className="flex items-start space-x-3 p-3 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
+                <span className="text-indigo-400 mt-0.5">✨</span>
+                <span className="text-gray-300 text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+          
+          <div className="space-y-4">
+            <h4 className="font-semibold text-cyan-400 mb-3">🎨 Mejoras de Diseño</h4>
+            {[
+              'Sistema de contraste mejorado',
+              'Legibilidad optimizada en todas las cards',
+              'Botones de acción consistentes',
+              'Badges y elementos visuales unificados'
+            ].map((feature, index) => (
+              <div key={index} className="flex items-start space-x-3 p-3 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-lg border border-cyan-500/20">
+                <span className="text-cyan-400 mt-0.5">🎨</span>
+                <span className="text-gray-300 text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 rounded-2xl p-8 backdrop-blur-sm">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full mb-6">
@@ -105,14 +151,25 @@ export default function AboutPage() {
             </svg>
           </div>
           <h3 className="text-2xl font-bold text-white mb-3">
-            IPStream Panel v1.0
+            IPStream Panel v1.2
           </h3>
           <p className="text-cyan-300 text-lg mb-2">
             Sistema completo de gestión de contenido para radio y streaming
           </p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-sm mb-4">
             Desarrollado con las mejores tecnologías web modernas
           </p>
+          <div className="flex justify-center space-x-4 text-sm">
+            <div className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30">
+              10 Módulos Activos
+            </div>
+            <div className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full border border-blue-500/30">
+              API REST Completa
+            </div>
+            <div className="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full border border-purple-500/30">
+              Diseño Accesible
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -93,13 +93,23 @@ Retorna todos los datos del cliente en una sola respuesta, incluyendo informaci�
   "podcasts": [
     {
       "id": "podcast123",
-      "title": "Episodio 1 - Introducción",
-      "description": "Primer episodio de nuestro podcast",
+      "title": "Episodio 1 - Introducción al Podcast",
+      "description": "Primer episodio de nuestro podcast de audio",
       "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast.jpg",
       "audioUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode1.mp3",
-      "videoUrl": null,
-      "fileType": "audio",
       "duration": "45:30",
+      "episodeNumber": 1,
+      "season": "Temporada 1"
+    }
+  ],
+  "videocasts": [
+    {
+      "id": "videocast123",
+      "title": "Episodio 1 - Introducción al Videocast",
+      "description": "Primer episodio de nuestro videocast",
+      "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/videocast.jpg",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "duration": "52:15",
       "episodeNumber": 1,
       "season": "Temporada 1"
     }
@@ -306,10 +316,10 @@ Retorna todas las promociones activas.
 
 ---
 
-### 9. Podcasts
+### 9. Podcasts (Audio)
 **Endpoint**: `GET /api/public/[clientId]/podcasts`
 
-Retorna todos los episodios de podcast/videocast con paginación, ordenados por número de episodio y fecha de creación.
+Retorna todos los episodios de podcast de audio con paginación, ordenados por número de episodio y fecha de creación.
 
 **Parámetros de Query**:
 - `page` (opcional): Número de página (default: 1)
@@ -325,8 +335,6 @@ Retorna todos los episodios de podcast/videocast con paginación, ordenados por 
       "description": "En este episodio conversamos con un invitado muy especial sobre los últimos acontecimientos en la música local",
       "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast5.jpg",
       "audioUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode5.mp3",
-      "videoUrl": null,
-      "fileType": "audio",
       "duration": "52:15",
       "episodeNumber": 5,
       "season": "Temporada 1",
@@ -338,9 +346,7 @@ Retorna todos los episodios de podcast/videocast con paginación, ordenados por 
       "title": "Episodio 4 - Música y Tecnología",
       "description": "Exploramos cómo la tecnología está cambiando la industria musical",
       "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast4.jpg",
-      "audioUrl": null,
-      "videoUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode4.mp4",
-      "fileType": "video",
+      "audioUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode4.mp3",
       "duration": "1:15:30",
       "episodeNumber": 4,
       "season": "Temporada 1",
@@ -357,16 +363,12 @@ Retorna todos los episodios de podcast/videocast con paginación, ordenados por 
 }
 ```
 
-**Tipos de Archivo**: Los valores posibles para `fileType` son:
-- `"audio"` - Episodio de podcast (solo audio)
-- `"video"` - Episodio de videocast (video con audio)
-
 ---
 
 ### 10. Podcast Individual por ID
 **Endpoint**: `GET /api/public/[clientId]/podcasts/[id]`
 
-Retorna un episodio específico de podcast usando su ID.
+Retorna un episodio específico de podcast de audio usando su ID.
 
 **Ejemplo de Respuesta**:
 ```json
@@ -376,8 +378,6 @@ Retorna un episodio específico de podcast usando su ID.
   "description": "En este episodio conversamos con un invitado muy especial sobre los últimos acontecimientos en la música local. Hablamos sobre las nuevas tendencias, los artistas emergentes y cómo la pandemia ha afectado la industria musical en nuestra región.",
   "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/podcast5.jpg",
   "audioUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/episode5.mp3",
-  "videoUrl": null,
-  "fileType": "audio",
   "duration": "52:15",
   "episodeNumber": 5,
   "season": "Temporada 1",
@@ -388,7 +388,79 @@ Retorna un episodio específico de podcast usando su ID.
 
 ---
 
-### 11. Redes Sociales
+### 11. Videocasts (Video)
+**Endpoint**: `GET /api/public/[clientId]/videocasts`
+
+Retorna todos los episodios de videocast con paginación, ordenados por número de episodio y fecha de creación.
+
+**Parámetros de Query**:
+- `page` (opcional): Número de página (default: 1)
+- `limit` (opcional): Cantidad de episodios por página (default: 10)
+
+**Ejemplo de Respuesta**:
+```json
+{
+  "data": [
+    {
+      "id": "videocast123",
+      "title": "Episodio 3 - Entrevista Visual",
+      "description": "En este episodio de videocast tenemos una entrevista especial con contenido visual exclusivo",
+      "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/videocast3.jpg",
+      "videoUrl": "https://www.youtube.com/watch?v=abc123xyz",
+      "duration": "1:25:30",
+      "episodeNumber": 3,
+      "season": "Temporada 1",
+      "createdAt": "2025-01-16T16:00:00.000Z",
+      "updatedAt": "2025-01-16T16:00:00.000Z"
+    },
+    {
+      "id": "videocast124",
+      "title": "Episodio 2 - Behind the Scenes",
+      "description": "Un vistazo detrás de cámaras de nuestro estudio de grabación",
+      "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/videocast2.jpg",
+      "videoUrl": "https://www.youtube.com/watch?v=def456ghi",
+      "duration": "45:15",
+      "episodeNumber": 2,
+      "season": "Temporada 1",
+      "createdAt": "2025-01-15T14:00:00.000Z",
+      "updatedAt": "2025-01-15T14:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 8,
+    "pages": 1
+  }
+}
+```
+
+---
+
+### 12. Videocast Individual por ID
+**Endpoint**: `GET /api/public/[clientId]/videocasts/[id]`
+
+Retorna un episodio específico de videocast usando su ID.
+
+**Ejemplo de Respuesta**:
+```json
+{
+  "id": "videocast123",
+  "title": "Episodio 3 - Entrevista Visual",
+  "description": "En este episodio de videocast tenemos una entrevista especial con contenido visual exclusivo. Conversamos sobre las últimas tendencias en producción audiovisual y cómo está evolucionando el contenido digital en nuestra región.",
+  "imageUrl": "/api/uploads/cmd6dyeer0003pstnwjb3w14g/videocast3.jpg",
+  "videoUrl": "https://www.youtube.com/watch?v=abc123xyz",
+  "duration": "1:25:30",
+  "episodeNumber": 3,
+  "season": "Temporada 1",
+  "createdAt": "2025-01-16T16:00:00.000Z",
+  "updatedAt": "2025-01-16T16:00:00.000Z"
+}
+```
+
+---
+
+### 13. Redes Sociales
 **Endpoint**: `GET /api/public/[clientId]/social-networks`
 
 Retorna los enlaces a las redes sociales de la radio.

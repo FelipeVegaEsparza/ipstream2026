@@ -5,12 +5,12 @@ import Image from 'next/image'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-interface Podcast {
+interface Videocast {
   id: string
   title: string
   description: string
   imageUrl?: string
-  audioUrl?: string
+  videoUrl?: string
   duration?: string
   episodeNumber?: number
   season?: string
@@ -18,18 +18,18 @@ interface Podcast {
   updatedAt: string
 }
 
-interface PodcastCardProps {
-  podcast: Podcast
-  onEdit: (podcast: Podcast) => void
+interface VideocastCardProps {
+  videocast: Videocast
+  onEdit: (videocast: Videocast) => void
   onDelete: (id: string) => void
   isDeleting?: boolean
 }
 
-export function PodcastCard({ podcast, onEdit, onDelete, isDeleting = false }: PodcastCardProps) {
+export function VideocastCard({ videocast, onEdit, onDelete, isDeleting = false }: VideocastCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleDelete = () => {
-    onDelete(podcast.id)
+    onDelete(videocast.id)
     setShowDeleteConfirm(false)
   }
 
@@ -40,29 +40,21 @@ export function PodcastCard({ podcast, onEdit, onDelete, isDeleting = false }: P
     })
   }
 
-  const getFileIcon = () => {
-    return '🎵'
-  }
-
-  const getFileTypeLabel = () => {
-    return 'Podcast'
-  }
-
   return (
     <div className="card-content group">
       {/* Header con imagen */}
-      <div className="relative h-48 bg-gradient-to-br from-purple-500 to-blue-600">
-        {podcast.imageUrl ? (
+      <div className="relative h-48 bg-gradient-to-br from-red-500 to-pink-600">
+        {videocast.imageUrl ? (
           <Image
-            src={podcast.imageUrl}
-            alt={podcast.title}
+            src={videocast.imageUrl}
+            alt={videocast.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-6xl opacity-80 text-white">
-              {getFileIcon()}
+              🎥
             </div>
           </div>
         )}
@@ -73,26 +65,26 @@ export function PodcastCard({ podcast, onEdit, onDelete, isDeleting = false }: P
         {/* Badges */}
         <div className="absolute top-4 left-4 flex space-x-2 z-10">
           <span className="badge badge-secondary backdrop-blur-sm">
-            {getFileTypeLabel()}
+            Videocast
           </span>
-          {podcast.episodeNumber && (
-            <span className="badge badge-primary backdrop-blur-sm">
-              Ep. {podcast.episodeNumber}
+          {videocast.episodeNumber && (
+            <span className="badge badge-danger backdrop-blur-sm">
+              Ep. {videocast.episodeNumber}
             </span>
           )}
         </div>
 
         {/* Duración */}
-        {podcast.duration && (
+        {videocast.duration && (
           <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium z-10">
-            {podcast.duration}
+            {videocast.duration}
           </div>
         )}
 
         {/* Botones de acción */}
         <div className="absolute bottom-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
           <button
-            onClick={() => onEdit(podcast)}
+            onClick={() => onEdit(videocast)}
             className="action-button action-button-edit"
             title="Editar episodio"
           >
@@ -122,32 +114,32 @@ export function PodcastCard({ podcast, onEdit, onDelete, isDeleting = false }: P
       <div className="p-6">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <h3 className="text-title mb-1 line-clamp-2">
-              {podcast.title}
+            <h3 className="text-title mb-1 line-clamp-2 group-hover:text-red-400">
+              {videocast.title}
             </h3>
             
-            {podcast.season && (
-              <p className="text-subtitle mb-2">
-                {podcast.season}
+            {videocast.season && (
+              <p className="text-sm text-red-400 font-medium mb-2">
+                {videocast.season}
               </p>
             )}
           </div>
         </div>
 
         <p className="text-description mb-4">
-          {podcast.description}
+          {videocast.description}
         </p>
 
         {/* Footer */}
         <div className="flex items-center justify-between text-meta">
           <span>
-            Publicado {formatDate(podcast.createdAt)}
+            Publicado {formatDate(videocast.createdAt)}
           </span>
           
           {/* Indicador de archivo */}
           <div className="flex items-center space-x-1">
-            <span>{getFileIcon()}</span>
-            <span>Audio</span>
+            <span>🎥</span>
+            <span>Video</span>
           </div>
         </div>
       </div>
@@ -162,7 +154,7 @@ export function PodcastCard({ podcast, onEdit, onDelete, isDeleting = false }: P
                 ¿Eliminar episodio?
               </h3>
               <p className="text-secondary mb-6">
-                Esta acción no se puede deshacer. El episodio "{podcast.title}" será eliminado permanentemente.
+                Esta acción no se puede deshacer. El episodio "{videocast.title}" será eliminado permanentemente.
               </p>
               <div className="flex space-x-3">
                 <button

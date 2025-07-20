@@ -6,14 +6,31 @@ export async function GET(
   { params }: { params: { clientId: string } }
 ) {
   try {
+    const { clientId } = params
     const { searchParams } = new URL(request.url)
+    
+    // Parámetros de paginación
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50) // Máximo 50
     const skip = (page - 1) * limit
 
+    // Verificar que el cliente existe
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      select: { id: true }
+    })
+
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Cliente no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Obtener noticias con paginación
     const [news, total] = await Promise.all([
       prisma.news.findMany({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           id: true,
           name: true,
@@ -22,16 +39,18 @@ export async function GET(
           longText: true,
           imageUrl: true,
           createdAt: true,
-          updatedAt: true,
+          updatedAt: true
         },
         orderBy: { createdAt: 'desc' },
         skip,
-        take: limit,
+        take: limit
       }),
       prisma.news.count({
-        where: { clientId: params.clientId }
+        where: { clientId }
       })
     ])
+
+    const totalPages = Math.ceil(total / limit)
 
     return NextResponse.json({
       data: news,
@@ -39,16 +58,15 @@ export async function GET(
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
+        pages: totalPages
       }
     })
+
   } catch (error) {
-    console.error('Error fetching news:', error)
+    console.error('Error getting news:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
     )
   }
 }
-
-// Note: GET_BY_SLUG functionality moved to [slug]/route.ts

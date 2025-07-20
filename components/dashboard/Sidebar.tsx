@@ -16,7 +16,8 @@ import {
   ShareIcon,
   CodeBracketIcon,
   InformationCircleIcon,
-  SpeakerWaveIcon
+  SpeakerWaveIcon,
+  PlayIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -25,7 +26,8 @@ const navigation = [
   { name: 'Redes Sociales', href: '/dashboard/social-networks', icon: ShareIcon },
   { name: 'Programas', href: '/dashboard/programs', icon: MicrophoneIcon },
   { name: 'Noticias', href: '/dashboard/news', icon: DocumentTextIcon },
-  { name: 'Podcast', href: '/dashboard/podcasts', icon: SpeakerWaveIcon },
+  { name: 'Podcasts', href: '/dashboard/podcasts', icon: SpeakerWaveIcon },
+  { name: 'Videocasts', href: '/dashboard/videocasts', icon: PlayIcon },
   { name: 'Ranking Videos', href: '/dashboard/videos', icon: VideoCameraIcon },
   { name: 'Auspiciadores', href: '/dashboard/sponsors', icon: UserGroupIcon },
   { name: 'Promociones', href: '/dashboard/promotions', icon: MegaphoneIcon },
@@ -87,7 +89,7 @@ function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
       {/* Footer del sidebar */}
       <div className="glass-effect rounded-xl p-4 text-center">
         <p className="text-xs text-gray-400">IPStream Panel</p>
-        <p className="text-xs text-gray-500">v1.0</p>
+        <p className="text-xs text-gray-500">v1.2</p>
       </div>
     </div>
   )

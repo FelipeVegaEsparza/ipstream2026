@@ -6,10 +6,26 @@ export async function GET(
   { params }: { params: { clientId: string; slug: string } }
 ) {
   try {
+    const { clientId, slug } = params
+
+    // Verificar que el cliente existe
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      select: { id: true }
+    })
+
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Cliente no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Obtener la noticia específica
     const news = await prisma.news.findFirst({
-      where: {
-        clientId: params.clientId,
-        slug: params.slug
+      where: { 
+        slug,
+        clientId 
       },
       select: {
         id: true,
@@ -19,7 +35,7 @@ export async function GET(
         longText: true,
         imageUrl: true,
         createdAt: true,
-        updatedAt: true,
+        updatedAt: true
       }
     })
 
@@ -31,8 +47,9 @@ export async function GET(
     }
 
     return NextResponse.json(news)
+
   } catch (error) {
-    console.error('Error fetching news:', error)
+    console.error('Error getting news:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

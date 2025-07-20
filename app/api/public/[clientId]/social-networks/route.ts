@@ -6,8 +6,24 @@ export async function GET(
   { params }: { params: { clientId: string } }
 ) {
   try {
+    const { clientId } = params
+
+    // Verificar que el cliente existe
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      select: { id: true }
+    })
+
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Cliente no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Obtener redes sociales
     const socialNetworks = await prisma.socialNetworks.findUnique({
-      where: { clientId: params.clientId },
+      where: { clientId },
       select: {
         facebook: true,
         youtube: true,
@@ -16,7 +32,7 @@ export async function GET(
         whatsapp: true,
         x: true,
         createdAt: true,
-        updatedAt: true,
+        updatedAt: true
       }
     })
 
@@ -28,8 +44,9 @@ export async function GET(
     }
 
     return NextResponse.json(socialNetworks)
+
   } catch (error) {
-    console.error('Error fetching social networks:', error)
+    console.error('Error getting social networks:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

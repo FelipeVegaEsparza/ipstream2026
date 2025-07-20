@@ -3,10 +3,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { clientId: string } }
+  { params }: { params: { clientId: string; id: string } }
 ) {
   try {
-    const { clientId } = params
+    const { clientId, id } = params
 
     // Verificar que el cliente existe
     const client = await prisma.client.findUnique({
@@ -21,33 +21,38 @@ export async function GET(
       )
     }
 
-    // Obtener programas
-    const programs = await prisma.program.findMany({
-      where: { clientId },
+    // Obtener el videocast específico (solo video)
+    const videocast = await prisma.podcast.findFirst({
+      where: { 
+        id,
+        clientId,
+        fileType: 'video' // Solo video
+      },
       select: {
         id: true,
-        name: true,
-        imageUrl: true,
+        title: true,
         description: true,
-        startTime: true,
-        endTime: true,
-        weekDays: true,
+        imageUrl: true,
+        videoUrl: true,
+        duration: true,
+        episodeNumber: true,
+        season: true,
         createdAt: true,
         updatedAt: true
-      },
-      orderBy: { startTime: 'asc' }
+      }
     })
 
-    // Procesar weekDays
-    const processedPrograms = programs.map(program => ({
-      ...program,
-      weekDays: typeof program.weekDays === 'string' ? JSON.parse(program.weekDays) : program.weekDays
-    }))
+    if (!videocast) {
+      return NextResponse.json(
+        { error: 'Episodio no encontrado' },
+        { status: 404 }
+      )
+    }
 
-    return NextResponse.json(processedPrograms)
+    return NextResponse.json(videocast)
 
   } catch (error) {
-    console.error('Error getting programs:', error)
+    console.error('Error getting videocast:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

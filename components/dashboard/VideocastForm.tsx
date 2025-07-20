@@ -3,48 +3,44 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { podcastSchema, type PodcastInput } from '@/lib/validations'
+import { videocastSchema, type VideocastInput } from '@/lib/validations'
 import { ImageUpload } from '@/components/ui/ImageUpload'
-import { FileUpload } from '@/components/ui/FileUpload'
 
-interface PodcastFormProps {
-  podcast?: any
-  onSubmit: (data: PodcastInput) => Promise<void>
+interface VideocastFormProps {
+  videocast?: any
+  onSubmit: (data: VideocastInput) => Promise<void>
   onCancel: () => void
   isLoading?: boolean
 }
 
-export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: PodcastFormProps) {
-  const [imageUrl, setImageUrl] = useState(podcast?.imageUrl || '')
-  const [audioUrl, setAudioUrl] = useState(podcast?.audioUrl || '')
+export function VideocastForm({ videocast, onSubmit, onCancel, isLoading = false }: VideocastFormProps) {
+  const [imageUrl, setImageUrl] = useState(videocast?.imageUrl || '')
 
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors }
-  } = useForm<PodcastInput>({
-    resolver: zodResolver(podcastSchema),
+  } = useForm<VideocastInput>({
+    resolver: zodResolver(videocastSchema),
     defaultValues: {
-      title: podcast?.title || '',
-      description: podcast?.description || '',
-      imageUrl: podcast?.imageUrl || '',
-      audioUrl: podcast?.audioUrl || '',
-      duration: podcast?.duration || '',
-      episodeNumber: podcast?.episodeNumber || undefined,
-      season: podcast?.season || '',
+      title: videocast?.title || '',
+      description: videocast?.description || '',
+      imageUrl: videocast?.imageUrl || '',
+      videoUrl: videocast?.videoUrl || '',
+      duration: videocast?.duration || '',
+      episodeNumber: videocast?.episodeNumber || undefined,
+      season: videocast?.season || '',
     }
   })
 
-  const handleFormSubmit = async (data: PodcastInput) => {
+  const handleFormSubmit = async (data: VideocastInput) => {
     const formData = {
       ...data,
       imageUrl,
-      audioUrl,
     }
     
-    console.log('Podcast form data being submitted:', formData)
-    console.log('Audio URL:', audioUrl)
+    console.log('Videocast form data being submitted:', formData)
+    console.log('Video URL:', data.videoUrl)
     
     await onSubmit(formData)
   }
@@ -61,22 +57,11 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
             {...register('title')}
             type="text"
             className="form-input"
-            placeholder="Ej: Episodio 1 - Introducción al Podcast"
+            placeholder="Ej: Episodio 1 - Introducción al Videocast"
           />
           {errors.title && (
             <p className="form-error">{errors.title.message}</p>
           )}
-        </div>
-
-        {/* Tipo de Contenido - Solo Audio */}
-        <div className="card-light">
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl">🎵</div>
-            <div>
-              <h3 className="font-semibold text-primary">Podcast de Audio</h3>
-              <p className="text-sm text-secondary">Este formulario es específico para episodios de audio</p>
-            </div>
-          </div>
         </div>
 
         {/* Número de Episodio y Temporada */}
@@ -159,25 +144,27 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
           onChange={setImageUrl}
           onRemove={() => setImageUrl('')}
           label="Imagen del Episodio"
-          description="Portada del episodio (recomendado: 1400x1400px - formato cuadrado)"
+          description="Portada del episodio (recomendado: 1920x1080px - formato 16:9)"
         />
 
-        {/* Archivo de Audio */}
-        <FileUpload
-          value={audioUrl}
-          onChange={(url) => {
-            setAudioUrl(url)
-            setValue('audioUrl', url)
-          }}
-          onRemove={() => {
-            setAudioUrl('')
-            setValue('audioUrl', '')
-          }}
-          accept="audio/*"
-          fileType="audio"
-          label="Archivo de Audio *"
-          description="Sube tu archivo de audio (MP3, WAV, M4A, AAC - Máx. 100MB)"
-        />
+        {/* URL de YouTube */}
+        <div>
+          <label className="form-label">
+            URL de YouTube *
+          </label>
+          <input
+            {...register('videoUrl')}
+            type="url"
+            className="form-input"
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+          <p className="form-help mt-1">
+            Pega aquí el enlace de tu video de YouTube
+          </p>
+          {errors.videoUrl && (
+            <p className="form-error">{errors.videoUrl.message}</p>
+          )}
+        </div>
 
         {/* Botones */}
         <div className="flex justify-end space-x-4 pt-6 border-t border-gray-700">
@@ -191,10 +178,10 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
           </button>
           <button
             type="submit"
-            className="btn-primary"
+            className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             disabled={isLoading}
           >
-            {isLoading ? 'Guardando...' : podcast ? 'Actualizar Episodio' : 'Crear Episodio'}
+            {isLoading ? 'Guardando...' : videocast ? 'Actualizar Episodio' : 'Crear Episodio'}
           </button>
         </div>
       </form>

@@ -27,19 +27,19 @@ export async function GET(
       )
     }
 
-    // Obtener podcasts con paginación (solo audio)
-    const [podcasts, total] = await Promise.all([
+    // Obtener videocasts con paginación (solo video)
+    const [videocasts, total] = await Promise.all([
       prisma.podcast.findMany({
         where: { 
           clientId,
-          fileType: 'audio' // Solo audio
+          fileType: 'video' // Solo video
         },
         select: {
           id: true,
           title: true,
           description: true,
           imageUrl: true,
-          audioUrl: true,
+          videoUrl: true,
           duration: true,
           episodeNumber: true,
           season: true,
@@ -56,7 +56,7 @@ export async function GET(
       prisma.podcast.count({
         where: { 
           clientId,
-          fileType: 'audio' // Solo audio
+          fileType: 'video' // Solo video
         }
       })
     ])
@@ -64,7 +64,7 @@ export async function GET(
     const totalPages = Math.ceil(total / limit)
 
     return NextResponse.json({
-      data: podcasts,
+      data: videocasts,
       pagination: {
         page,
         limit,
@@ -74,7 +74,7 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('Error getting podcasts:', error)
+    console.error('Error getting videocasts:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

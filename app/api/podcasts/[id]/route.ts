@@ -27,7 +27,8 @@ export async function GET(
     const podcast = await prisma.podcast.findFirst({
       where: {
         id: params.id,
-        clientId: effectiveClient.clientId
+        clientId: effectiveClient.clientId,
+        fileType: 'audio' // Solo audio
       }
     })
 
@@ -71,7 +72,8 @@ export async function PUT(
     const existingPodcast = await prisma.podcast.findFirst({
       where: {
         id: params.id,
-        clientId: effectiveClient.clientId
+        clientId: effectiveClient.clientId,
+        fileType: 'audio' // Solo audio
       }
     })
 
@@ -131,7 +133,11 @@ export async function PUT(
       where: {
         id: params.id
       },
-      data: data
+      data: {
+        ...data,
+        fileType: 'audio', // Mantener tipo audio
+        videoUrl: null, // No video para podcasts
+      }
     })
 
     console.log('🎙️ Podcast updated successfully:', podcast.id)
@@ -184,7 +190,8 @@ export async function DELETE(
     const existingPodcast = await prisma.podcast.findFirst({
       where: {
         id: params.id,
-        clientId: effectiveClient.clientId
+        clientId: effectiveClient.clientId,
+        fileType: 'audio' // Solo audio
       }
     })
 

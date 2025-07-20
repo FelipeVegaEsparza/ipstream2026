@@ -6,10 +6,27 @@ export async function GET(
   { params }: { params: { clientId: string; id: string } }
 ) {
   try {
+    const { clientId, id } = params
+
+    // Verificar que el cliente existe
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      select: { id: true }
+    })
+
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Cliente no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Obtener el podcast específico (solo audio)
     const podcast = await prisma.podcast.findFirst({
-      where: {
-        id: params.id,
-        clientId: params.clientId
+      where: { 
+        id,
+        clientId,
+        fileType: 'audio' // Solo audio
       },
       select: {
         id: true,
@@ -17,13 +34,11 @@ export async function GET(
         description: true,
         imageUrl: true,
         audioUrl: true,
-        videoUrl: true,
-        fileType: true,
         duration: true,
         episodeNumber: true,
         season: true,
         createdAt: true,
-        updatedAt: true,
+        updatedAt: true
       }
     })
 
@@ -35,8 +50,9 @@ export async function GET(
     }
 
     return NextResponse.json(podcast)
+
   } catch (error) {
-    console.error('Error fetching podcast:', error)
+    console.error('Error getting podcast:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

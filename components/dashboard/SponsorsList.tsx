@@ -73,15 +73,15 @@ export function SponsorsList({ sponsors }: SponsorsListProps) {
   if (sponsors.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 mb-4">
+        <div className="text-muted mb-4">
           <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <h3 className="text-lg font-medium text-primary mb-2">
           No hay auspiciadores
         </h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-secondary mb-4">
           Comienza agregando tu primer auspiciador
         </p>
         <Link href="/dashboard/sponsors/new" className="btn-primary">
@@ -109,8 +109,8 @@ export function SponsorsList({ sponsors }: SponsorsListProps) {
                   className="h-20 w-auto object-contain"
                 />
               ) : (
-                <div className="h-20 w-32 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-400 text-sm">Sin logo</span>
+                <div className="h-20 w-32 bg-gray-700 rounded-lg flex items-center justify-center">
+                  <span className="text-muted text-sm">Sin logo</span>
                 </div>
               )}
             </div>
@@ -118,18 +118,18 @@ export function SponsorsList({ sponsors }: SponsorsListProps) {
             {/* Content */}
             <div className="space-y-3">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-bold text-primary">
                   {sponsor.name}
                 </h3>
                 {sponsor.address && (
-                  <div className="flex items-center justify-center text-sm text-gray-500 mt-1">
+                  <div className="flex items-center justify-center text-sm text-secondary mt-1">
                     <MapPinIcon className="h-4 w-4 mr-1" />
                     {sponsor.address}
                   </div>
                 )}
               </div>
               
-              <p className="text-gray-600 text-sm line-clamp-3 text-center">
+              <p className="text-secondary text-sm line-clamp-3 text-center">
                 {sponsor.description}
               </p>
 
@@ -142,14 +142,14 @@ export function SponsorsList({ sponsors }: SponsorsListProps) {
                       href={network.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`text-xs px-2 py-1 rounded-full bg-gray-100 hover:bg-gray-200 ${network.color}`}
+                      className="badge badge-secondary hover:badge-primary transition-colors"
                       title={network.name}
                     >
                       {network.name}
                     </a>
                   ))}
                   {socialNetworks.length > 4 && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500">
+                    <span className="badge badge-secondary">
                       +{socialNetworks.length - 4}
                     </span>
                   )}
@@ -163,7 +163,7 @@ export function SponsorsList({ sponsors }: SponsorsListProps) {
                     href={sponsor.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
+                    className="inline-flex items-center text-sm text-accent hover:text-cyan-300 transition-colors"
                   >
                     <GlobeAltIcon className="h-4 w-4 mr-1" />
                     Sitio Web
@@ -171,33 +171,37 @@ export function SponsorsList({ sponsors }: SponsorsListProps) {
                 </div>
               )}
 
-              <div className="text-center text-xs text-gray-500">
+              <div className="text-center text-xs text-muted">
                 Agregado: {formatDate(sponsor.createdAt)}
               </div>
               
               {/* Actions */}
-              <div className="flex justify-center space-x-2 pt-3 border-t">
+              <div className="flex justify-center space-x-2 pt-3 border-t border-gray-700">
                 <Link
                   href={`/dashboard/sponsors/${sponsor.id}`}
-                  className="p-2 text-gray-400 hover:text-blue-600"
+                  className="action-button action-button-view"
                   title="Ver auspiciador"
                 >
-                  <EyeIcon className="h-5 w-5" />
+                  <EyeIcon className="h-4 w-4" />
                 </Link>
                 <Link
                   href={`/dashboard/sponsors/${sponsor.id}/edit`}
-                  className="p-2 text-gray-400 hover:text-primary-600"
+                  className="action-button action-button-edit"
                   title="Editar auspiciador"
                 >
-                  <PencilIcon className="h-5 w-5" />
+                  <PencilIcon className="h-4 w-4" />
                 </Link>
                 <button
                   onClick={() => handleDelete(sponsor.id)}
                   disabled={loading === sponsor.id}
-                  className="p-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                  className="action-button action-button-delete"
                   title="Eliminar auspiciador"
                 >
-                  <TrashIcon className="h-5 w-5" />
+                  {loading === sponsor.id ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <TrashIcon className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>

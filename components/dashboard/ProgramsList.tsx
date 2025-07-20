@@ -49,15 +49,15 @@ export function ProgramsList({ programs }: ProgramsListProps) {
   if (programs.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 mb-4">
+        <div className="text-muted mb-4">
           <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <h3 className="text-lg font-medium text-primary mb-2">
           No hay programas
         </h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-secondary mb-4">
           Comienza agregando tu primer programa de radio
         </p>
         <Link href="/dashboard/programs/new" className="btn-primary">
@@ -87,36 +87,44 @@ export function ProgramsList({ programs }: ProgramsListProps) {
             )}
             
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-bold text-primary">
                 {program.name}
               </h3>
               
-              <p className="text-gray-600 text-sm line-clamp-3">
+              <p className="text-secondary text-sm line-clamp-3">
                 {program.description}
               </p>
               
-              <div className="text-sm text-gray-500">
-                <div>
-                  <strong>Horario:</strong> {formatTime(program.startTime)} - {formatTime(program.endTime)}
+              <div className="text-sm text-secondary space-y-1">
+                <div className="flex items-center">
+                  <span className="font-semibold text-accent mr-2">Horario:</span>
+                  <span>{formatTime(program.startTime)} - {formatTime(program.endTime)}</span>
                 </div>
-                <div>
-                  <strong>Días:</strong> {formatWeekDays(weekDays)}
+                <div className="flex items-center">
+                  <span className="font-semibold text-accent mr-2">Días:</span>
+                  <span>{formatWeekDays(weekDays)}</span>
                 </div>
               </div>
               
-              <div className="flex justify-end space-x-2 pt-3 border-t">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-gray-700">
                 <Link
                   href={`/dashboard/programs/${program.id}/edit`}
-                  className="p-2 text-gray-400 hover:text-primary-600"
+                  className="action-button action-button-edit"
+                  title="Editar programa"
                 >
-                  <PencilIcon className="h-5 w-5" />
+                  <PencilIcon className="h-4 w-4" />
                 </Link>
                 <button
                   onClick={() => handleDelete(program.id)}
                   disabled={loading === program.id}
-                  className="p-2 text-gray-400 hover:text-red-600 disabled:opacity-50"
+                  className="action-button action-button-delete"
+                  title="Eliminar programa"
                 >
-                  <TrashIcon className="h-5 w-5" />
+                  {loading === program.id ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <TrashIcon className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>

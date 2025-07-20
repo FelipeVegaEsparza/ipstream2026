@@ -2,24 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { podcastSchema } from '@/lib/validations'
+import { videocastSchema } from '@/lib/validations'
 import { getEffectiveClientFromRequest } from '@/lib/getEffectiveClient'
 import { sanitizeObject, validateText } from '@/lib/text-sanitizer'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🎙️ Creating podcast - Start')
+    console.log('🎥 Creating videocast - Start')
     
     // Obtener la sesión para debug
     const session = await getServerSession(authOptions)
-    console.log('🎙️ Session user:', session?.user)
+    console.log('🎥 Session user:', session?.user)
     
     // Usar la función helper para obtener el cliente efectivo
     const effectiveClient = await getEffectiveClientFromRequest(request)
     
     if (!effectiveClient) {
-      console.log('🎙️ No effective client found')
-      console.log('🎙️ Session details:', {
+      console.log('🎥 No effective client found')
+      console.log('🎥 Session details:', {
         hasSession: !!session,
         userId: session?.user?.id,
         userRole: session?.user?.role,
@@ -31,20 +31,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('🎙️ Effective client:', effectiveClient)
+    console.log('🎥 Effective client:', effectiveClient)
 
     const body = await request.json()
-    console.log('🎙️ Request body keys:', Object.keys(body))
+    console.log('🎥 Request body keys:', Object.keys(body))
     
     // Sanitizar el texto antes de validar
     const sanitizedBody = sanitizeObject(body)
-    console.log('🎙️ Text sanitized')
+    console.log('🎥 Text sanitized')
     
     // Validar campos de texto críticos
     if (sanitizedBody.title) {
       const titleValidation = validateText(sanitizedBody.title)
       if (!titleValidation.isValid) {
-        console.log('🎙️ Invalid title text:', titleValidation.error)
+        console.log('🎥 Invalid title text:', titleValidation.error)
         return NextResponse.json(
           { error: `Título del episodio inválido: ${titleValidation.error}` },
           { status: 400 }
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (sanitizedBody.description) {
       const descValidation = validateText(sanitizedBody.description)
       if (!descValidation.isValid) {
-        console.log('🎙️ Invalid description:', descValidation.error)
+        console.log('🎥 Invalid description:', descValidation.error)
         return NextResponse.json(
           { error: `Descripción inválida: ${descValidation.error}` },
           { status: 400 }
@@ -64,37 +64,37 @@ export async function POST(request: NextRequest) {
     }
 
     // Try to parse with Zod
-    console.log('🎙️ Attempting Zod validation...')
+    console.log('🎥 Attempting Zod validation...')
     let data;
     try {
-      data = podcastSchema.parse(sanitizedBody)
-      console.log('🎙️ Zod validation successful')
+      data = videocastSchema.parse(sanitizedBody)
+      console.log('🎥 Zod validation successful')
     } catch (zodError) {
-      console.log('🎙️ Zod validation failed:', zodError)
+      console.log('🎥 Zod validation failed:', zodError)
       return NextResponse.json(
         { error: 'Error de validación: ' + zodError.message },
         { status: 400 }
       )
     }
 
-    console.log('🎙️ Creating podcast in database...')
-    const podcast = await prisma.podcast.create({
+    console.log('🎥 Creating videocast in database...')
+    const videocast = await prisma.podcast.create({
       data: {
         ...data,
-        fileType: 'audio', // Forzar tipo audio
-        videoUrl: null, // No video para podcasts
+        fileType: 'video', // Forzar tipo video
+        audioUrl: null, // No audio para videocasts
         clientId: effectiveClient.clientId,
       }
     })
 
-    console.log('🎙️ Podcast created successfully:', podcast.id)
-    return NextResponse.json(podcast)
+    console.log('🎥 Videocast created successfully:', videocast.id)
+    return NextResponse.json(videocast)
   } catch (error) {
-    console.error('🎙️ Error creating podcast:', error)
+    console.error('🎥 Error creating videocast:', error)
     
     if (error instanceof Error) {
-      console.error('🎙️ Error message:', error.message)
-      console.error('🎙️ Error stack:', error.stack)
+      console.error('🎥 Error message:', error.message)
+      console.error('🎥 Error stack:', error.stack)
       
       // Check for specific Prisma errors
       if (error.message.includes('Unique constraint')) {
@@ -124,25 +124,25 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🎙️ Getting podcasts - Start')
+    console.log('🎥 Getting videocasts - Start')
     
     // Usar la función helper para obtener el cliente efectivo
     const effectiveClient = await getEffectiveClientFromRequest(request)
     
     if (!effectiveClient) {
-      console.log('🎙️ No effective client found')
+      console.log('🎥 No effective client found')
       return NextResponse.json(
         { error: 'No autorizado - Sin cliente asociado' },
         { status: 401 }
       )
     }
 
-    console.log('🎙️ Effective client:', effectiveClient)
+    console.log('🎥 Effective client:', effectiveClient)
 
-    const podcasts = await prisma.podcast.findMany({
+    const videocasts = await prisma.podcast.findMany({
       where: {
         clientId: effectiveClient.clientId,
-        fileType: 'audio' // Solo audio
+        fileType: 'video' // Solo videos
       },
       orderBy: [
         { episodeNumber: 'desc' },
@@ -150,10 +150,10 @@ export async function GET(request: NextRequest) {
       ]
     })
 
-    console.log('🎙️ Found', podcasts.length, 'podcasts')
-    return NextResponse.json(podcasts)
+    console.log('🎥 Found', videocasts.length, 'videocasts')
+    return NextResponse.json(videocasts)
   } catch (error) {
-    console.error('🎙️ Error getting podcasts:', error)
+    console.error('🎥 Error getting videocasts:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

@@ -6,9 +6,11 @@ export async function GET(
   { params }: { params: { clientId: string } }
 ) {
   try {
+    const { clientId } = params
+
     // Verificar que el cliente existe
     const client = await prisma.client.findUnique({
-      where: { id: params.clientId },
+      where: { id: clientId },
       select: { id: true, name: true }
     })
 
@@ -20,18 +22,9 @@ export async function GET(
     }
 
     // Obtener todos los datos del cliente
-    const [
-      basicData,
-      socialNetworks,
-      programs,
-      news,
-      videos,
-      sponsors,
-      promotions,
-      podcasts
-    ] = await Promise.all([
+    const [basicData, socialNetworks, programs, news, videos, sponsors, promotions, [podcasts, videocasts]] = await Promise.all([
       prisma.basicData.findUnique({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           projectName: true,
           projectDescription: true,
@@ -39,10 +32,12 @@ export async function GET(
           coverUrl: true,
           radioStreamingUrl: true,
           videoStreamingUrl: true,
+          createdAt: true,
+          updatedAt: true
         }
       }),
       prisma.socialNetworks.findUnique({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           facebook: true,
           youtube: true,
@@ -50,10 +45,12 @@ export async function GET(
           tiktok: true,
           whatsapp: true,
           x: true,
+          createdAt: true,
+          updatedAt: true
         }
       }),
       prisma.program.findMany({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           id: true,
           name: true,
@@ -62,11 +59,13 @@ export async function GET(
           startTime: true,
           endTime: true,
           weekDays: true,
+          createdAt: true,
+          updatedAt: true
         },
         orderBy: { startTime: 'asc' }
       }),
       prisma.news.findMany({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           id: true,
           name: true,
@@ -74,90 +73,129 @@ export async function GET(
           shortText: true,
           imageUrl: true,
           createdAt: true,
+          updatedAt: true
         },
         orderBy: { createdAt: 'desc' },
         take: 10
       }),
       prisma.rankingVideo.findMany({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           id: true,
           name: true,
           videoUrl: true,
           description: true,
           order: true,
+          createdAt: true,
+          updatedAt: true
         },
         orderBy: { order: 'asc' }
       }),
       prisma.sponsor.findMany({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           id: true,
           name: true,
           logoUrl: true,
+          address: true,
           description: true,
+          facebook: true,
+          youtube: true,
+          instagram: true,
+          tiktok: true,
+          whatsapp: true,
+          x: true,
           website: true,
-        },
-        orderBy: { createdAt: 'desc' }
+          createdAt: true,
+          updatedAt: true
+        }
       }),
       prisma.promotion.findMany({
-        where: { clientId: params.clientId },
+        where: { clientId },
         select: {
           id: true,
           title: true,
           description: true,
           imageUrl: true,
           link: true,
+          createdAt: true,
+          updatedAt: true
         },
         orderBy: { createdAt: 'desc' }
       }),
-      prisma.podcast.findMany({
-        where: { clientId: params.clientId },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          imageUrl: true,
-          audioUrl: true,
-          videoUrl: true,
-          fileType: true,
-          duration: true,
-          episodeNumber: true,
-          season: true,
-          createdAt: true,
-        },
-        orderBy: [
-          { episodeNumber: 'desc' },
-          { createdAt: 'desc' }
-        ],
-        take: 10
-      })
+      Promise.all([
+        // Podcasts (audio)
+        prisma.podcast.findMany({
+          where: { 
+            clientId,
+            fileType: 'audio'
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            audioUrl: true,
+            duration: true,
+            episodeNumber: true,
+            season: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          orderBy: [
+            { episodeNumber: 'desc' },
+            { createdAt: 'desc' }
+          ],
+          take: 10
+        }),
+        // Videocasts (video)
+        prisma.podcast.findMany({
+          where: { 
+            clientId,
+            fileType: 'video'
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            videoUrl: true,
+            duration: true,
+            episodeNumber: true,
+            season: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          orderBy: [
+            { episodeNumber: 'desc' },
+            { createdAt: 'desc' }
+          ],
+          take: 10
+        })
+      ])
     ])
 
-    // Parse weekDays JSON for programs
-    const parsedPrograms = programs.map(program => ({
+    // Procesar weekDays para programs
+    const processedPrograms = programs.map(program => ({
       ...program,
-      weekDays: JSON.parse(program.weekDays)
+      weekDays: typeof program.weekDays === 'string' ? JSON.parse(program.weekDays) : program.weekDays
     }))
 
-    const response = {
-      client: {
-        id: client.id,
-        name: client.name
-      },
+    return NextResponse.json({
+      client,
       basicData,
       socialNetworks,
-      programs: parsedPrograms,
+      programs: processedPrograms,
       news,
       videos,
       sponsors,
       promotions,
-      podcasts
-    }
+      podcasts,
+      videocasts
+    })
 
-    return NextResponse.json(response)
   } catch (error) {
-    console.error('Error fetching client data:', error)
+    console.error('Error getting client data:', error)
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
