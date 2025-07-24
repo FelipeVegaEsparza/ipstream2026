@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { handleCors, createCorsResponse, createCorsErrorResponse } from '@/lib/cors'
+
+export async function OPTIONS() {
+  return handleCors()
+}
 
 export async function GET(
   request: NextRequest,
@@ -15,10 +20,7 @@ export async function GET(
     })
 
     if (!client) {
-      return NextResponse.json(
-        { error: 'Cliente no encontrado' },
-        { status: 404 }
-      )
+      return createCorsErrorResponse('Cliente no encontrado', 404)
     }
 
     // Obtener todos los datos del cliente
@@ -181,7 +183,7 @@ export async function GET(
       weekDays: typeof program.weekDays === 'string' ? JSON.parse(program.weekDays) : program.weekDays
     }))
 
-    return NextResponse.json({
+    return createCorsResponse({
       client,
       basicData,
       socialNetworks,
@@ -196,9 +198,6 @@ export async function GET(
 
   } catch (error) {
     console.error('Error getting client data:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    return createCorsErrorResponse('Error interno del servidor', 500)
   }
 }

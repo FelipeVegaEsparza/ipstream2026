@@ -647,7 +647,10 @@ function RadioWebsite({ clientId }) {
 
 4. **Rate Limiting**: La API no tiene límites de velocidad actualmente, pero se recomienda hacer solicitudes responsables.
 
-5. **CORS**: La API está configurada para permitir solicitudes desde cualquier origen.
+5. **CORS**: La API está configurada para permitir solicitudes desde cualquier origen con los siguientes headers:
+   - `Access-Control-Allow-Origin: *`
+   - `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS`
+   - `Access-Control-Allow-Headers: Content-Type, Authorization`
 
 6. **Formato de Fechas**: Todas las fechas están en formato ISO 8601 UTC.
 

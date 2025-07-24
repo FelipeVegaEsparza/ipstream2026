@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
+import { corsHeaders, handleCors } from '@/lib/cors'
+
+export async function OPTIONS() {
+  return handleCors()
+}
 
 export async function GET(
   request: NextRequest,
@@ -15,7 +20,10 @@ export async function GET(
     
     if (!existsSync(filePath)) {
       console.log('File not found:', filePath)
-      return new NextResponse('File not found', { status: 404 })
+      return new NextResponse('File not found', { 
+        status: 404,
+        headers: corsHeaders
+      })
     }
 
     const file = await readFile(filePath)
@@ -45,12 +53,16 @@ export async function GET(
 
     return new NextResponse(file, {
       headers: {
+        ...corsHeaders,
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     })
   } catch (error) {
     console.error('Error serving file:', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    return new NextResponse('Internal Server Error', { 
+      status: 500,
+      headers: corsHeaders
+    })
   }
 }

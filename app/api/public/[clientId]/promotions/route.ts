@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { handleCors, createCorsResponse, createCorsErrorResponse } from '@/lib/cors'
+
+export async function OPTIONS() {
+  return handleCors()
+}
 
 export async function GET(
   request: NextRequest,
@@ -15,10 +20,7 @@ export async function GET(
     })
 
     if (!client) {
-      return NextResponse.json(
-        { error: 'Cliente no encontrado' },
-        { status: 404 }
-      )
+      return createCorsErrorResponse('Cliente no encontrado', 404)
     }
 
     // Obtener promociones
@@ -36,13 +38,10 @@ export async function GET(
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json(promotions)
+    return createCorsResponse(promotions)
 
   } catch (error) {
     console.error('Error getting promotions:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    return createCorsErrorResponse('Error interno del servidor', 500)
   }
 }

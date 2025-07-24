@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { handleCors, createCorsResponse, createCorsErrorResponse } from '@/lib/cors'
+
+export async function OPTIONS() {
+  return handleCors()
+}
 
 export async function GET(
   request: NextRequest,
@@ -21,10 +26,7 @@ export async function GET(
     })
 
     if (!client) {
-      return NextResponse.json(
-        { error: 'Cliente no encontrado' },
-        { status: 404 }
-      )
+      return createCorsErrorResponse('Cliente no encontrado', 404)
     }
 
     // Obtener videocasts con paginación (solo video)
@@ -63,7 +65,7 @@ export async function GET(
 
     const totalPages = Math.ceil(total / limit)
 
-    return NextResponse.json({
+    return createCorsResponse({
       data: videocasts,
       pagination: {
         page,
@@ -75,9 +77,6 @@ export async function GET(
 
   } catch (error) {
     console.error('Error getting videocasts:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    return createCorsErrorResponse('Error interno del servidor', 500)
   }
 }

@@ -89,6 +89,8 @@ export const config = {
     '/dashboard/:path*',
     '/admin/:path*',
     '/api/dashboard/:path*',
-    '/api/admin/:path*'
+    '/api/admin/:path*',
+    // Excluir explícitamente rutas públicas de CORS
+    '/((?!api/public|api/uploads|api/auth).*)'
   ]
 }
