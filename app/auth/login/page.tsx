@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -46,10 +47,13 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="card">
           <div className="flex justify-center mb-8">
-            <img
+            <Image
               src="/logo-ipstream.png"
               alt="IPStream Panel"
+              width={320}
+              height={80}
               className="h-20 w-auto filter drop-shadow-lg"
+              priority
             />
           </div>
           <h2 className="text-center text-3xl font-bold text-white mb-2">
