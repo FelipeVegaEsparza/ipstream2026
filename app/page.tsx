@@ -1,27 +1,26 @@
-import { redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { headers } from 'next/headers'
+'use client';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-export default async function HomePage() {
-  const headersList = headers()
-  const userAgent = headersList.get('user-agent')
+export default function HomePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  // Health check for Docker/monitoring services
-  if (userAgent && (userAgent.includes('docker/healthcheck') || userAgent.includes('UptimeRobot'))) {
-    return <p>OK</p>;
-  }
+  useEffect(() => {
+    // No redirigir hasta que se determine el estado de la sesión
+    if (status === 'loading') {
+      return;
+    }
 
-  // Redirect logic for real users
-  const session = await getServerSession(authOptions)
-  
-  if (!session) {
-    redirect('/auth/login')
-  }
-  
-  if (session.user.role === 'ADMIN') {
-    redirect('/admin')
-  } else {
-    redirect('/dashboard')
-  }
+    if (!session) {
+      router.replace('/auth/login');
+    } else if (session.user.role === 'ADMIN') {
+      router.replace('/admin');
+    } else {
+      router.replace('/dashboard');
+    }
+  }, [session, status, router]);
+
+  return <h1>Redirigiendo...</h1>;
 }

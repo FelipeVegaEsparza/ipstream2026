@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { DirectoryInitializer } from '@/components/providers/DirectoryInitializer'
 
+import AuthSessionProvider from '@/components/providers/AuthSessionProvider'
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -18,11 +20,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <DirectoryInitializer />
-        {children}
-        {/* Script global para sanitizar texto pegado */}
-        <script src="/text-sanitizer.js" async></script>
+        <AuthSessionProvider>
+          <DirectoryInitializer />
+          {children}
+          {/* Script global para sanitizar texto pegado */}
+          <script src="/text-sanitizer.js" async></script>
+        </AuthSessionProvider>
       </body>
     </html>
-  )
-}
