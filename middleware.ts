@@ -86,11 +86,17 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/admin/:path*',
-    '/api/dashboard/:path*',
-    '/api/admin/:path*',
-    // Excluir explícitamente rutas públicas de CORS
-    '/((?!api/public|api/uploads|api/auth).*)'
-  ]
-}
+    /*
+     * Match all request paths except for the ones starting with:
+     * - /_next/static (static files)
+     * - /_next/image (image optimization requests)
+     * - /favicon.ico (favicon file)
+     * - /logo-ipstream.png (specific static asset)
+     * - /text-sanitizer.js.bak (if it exists)
+     * - /api/auth (NextAuth API routes)
+     * - /api/public (public API routes)
+     * - /api/uploads (uploaded files API routes)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|logo-ipstream.png|text-sanitizer.js.bak|api/auth|api/public|api/uploads).*)',
+  ],
+};
