@@ -47,13 +47,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="card">
           <div className="flex justify-center mb-8">
-            <Image
+            <img
               src="/logo-ipstream.png"
               alt="IPStream Panel"
-              width={320}
-              height={80}
               className="h-20 w-auto filter drop-shadow-lg"
-              priority
             />
           </div>
           <h2 className="text-center text-3xl font-bold text-white mb-2">
