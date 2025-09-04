@@ -25,7 +25,7 @@ export default function RootLayout({
           <DirectoryInitializer />
           {children}
           {/* Script global para sanitizar texto pegado */}
-          <Script src="/text-sanitizer.js" strategy="afterInteractive" />
+          {/* <Script src="/text-sanitizer.js" strategy="afterInteractive" /> */}
         </AuthSessionProvider>
       </body>
     </html>
