@@ -6,7 +6,7 @@
 (function() {
   'use strict';
 
-  // Función para analizar caracteres problemáticos
+  // Función para analizar caracteres   problemáticos
   function analyzeText(text) {
     const problematicChars = [];
     for (let i = 0; i < text.length; i++) {
