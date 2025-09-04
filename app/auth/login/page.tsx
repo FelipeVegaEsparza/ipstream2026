@@ -48,7 +48,7 @@ export default function LoginPage() {
         <div className="card">
           <div className="flex justify-center mb-8">
             <Image
-              src="/logo-ipstream.png"
+              src="https://www.ipstream.cl/wp-content/uploads/2024/07/logo-white.png"
               alt="IPStream Panel"
               width={320}
               height={80}
