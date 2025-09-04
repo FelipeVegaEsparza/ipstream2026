@@ -8,18 +8,6 @@ export default withAuth(
       const token = req.nextauth.token
       const { pathname } = req.nextUrl
 
-      // Redirección desde la página principal
-      if (pathname === '/') {
-        if (!token) {
-          return NextResponse.redirect(new URL('/auth/login', req.url))
-        }
-        if (token.role === 'ADMIN') {
-          return NextResponse.redirect(new URL('/admin', req.url))
-        } else {
-          return NextResponse.redirect(new URL('/dashboard', req.url))
-        }
-      }
-
       // Verificar impersonación en rutas del dashboard y API
       if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/dashboard') || pathname.startsWith('/api/news') || pathname.startsWith('/api/programs') || pathname.startsWith('/api/sponsors') || pathname.startsWith('/api/promotions') || pathname.startsWith('/api/videos')) {
         const impersonationToken = req.cookies.get('impersonation_token')?.value
