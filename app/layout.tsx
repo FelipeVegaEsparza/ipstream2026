@@ -1,31 +1,14 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
-import { DirectoryInitializer } from '@/components/providers/DirectoryInitializer'
 
-import AuthSessionProvider from '@/components/providers/AuthSessionProvider'
-import Script from 'next/script'
-
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'IPStream Panel',
-  description: 'Panel de gestión de contenido para radio y streaming',
+export const metadata = {
+  title: 'Test App',
+  description: 'Test description',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className={inter.className}>
-        <AuthSessionProvider>
-          <DirectoryInitializer />
-          {children}
-          {/* Script global para sanitizar texto pegado */}
-          {/* <Script src="/text-sanitizer.js" strategy="afterInteractive" /> */}
-        </AuthSessionProvider>
-      </body>
+      <body>{children}</body>
     </html>
+  )
+}
