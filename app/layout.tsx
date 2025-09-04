@@ -4,6 +4,7 @@ import './globals.css'
 import { DirectoryInitializer } from '@/components/providers/DirectoryInitializer'
 
 import AuthSessionProvider from '@/components/providers/AuthSessionProvider'
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,7 @@ export default function RootLayout({
           <DirectoryInitializer />
           {children}
           {/* Script global para sanitizar texto pegado */}
-          <script src="/text-sanitizer.js" async></script>
+          <Script src="/text-sanitizer.js" strategy="afterInteractive" />
         </AuthSessionProvider>
       </body>
     </html>
