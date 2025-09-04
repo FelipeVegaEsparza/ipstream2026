@@ -24,6 +24,8 @@ ssh $VPS_USER@$VPS_HOST << 'EOF'
 cd /home/tu-usuario/ipstream-panel
 echo "📦 Instalando dependencias..."
 npm ci --production=false
+echo "🏗️ Construyendo la aplicación..."
+npm run build
 echo "🏗️ Generando Prisma Client..."
 npx prisma generate
 echo "🗄️ Sincronizando base de datos..."
