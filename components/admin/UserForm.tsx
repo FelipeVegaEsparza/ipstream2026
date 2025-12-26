@@ -6,14 +6,26 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-const userSchema = z.object({
+// Esquema para crear usuario (contraseña requerida)
+const createUserSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
   clientName: z.string().min(1, 'El nombre del proyecto es requerido'),
 })
 
-type UserInput = z.infer<typeof userSchema>
+// Esquema para editar usuario (contraseña opcional)
+const editUserSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido'),
+  email: z.string().email('Email inválido'),
+  password: z.string().optional().refine(
+    (val) => !val || val.length >= 6,
+    'La contraseña debe tener al menos 6 caracteres'
+  ),
+  clientName: z.string().min(1, 'El nombre del proyecto es requerido'),
+})
+
+type UserInput = z.infer<typeof createUserSchema>
 
 interface UserFormProps {
   initialData?: {
@@ -32,12 +44,15 @@ export function UserForm({ initialData }: UserFormProps) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
+  // Usar el esquema apropiado según si es creación o edición
+  const schema = initialData ? editUserSchema : createUserSchema
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<UserInput>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: initialData?.name || '',
       email: initialData?.email || '',

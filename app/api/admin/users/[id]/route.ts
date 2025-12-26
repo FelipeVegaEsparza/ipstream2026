@@ -8,9 +8,12 @@ import { z } from 'zod'
 const updateUserSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   email: z.string().email('Email inválido'),
-  password: z.string().optional(),
+  password: z.string().optional().refine(
+    (val) => !val || val.length >= 6,
+    'La contraseña debe tener al menos 6 caracteres'
+  ),
   clientName: z.string().min(1, 'El nombre del proyecto es requerido'),
-  plan: z.string().default('basic'),
+  plan: z.string().optional(),
 })
 
 export async function GET(
@@ -133,7 +136,8 @@ export async function PUT(
           where: { id: existingUser.client.id },
           data: {
             name: data.clientName,
-            plan: data.plan
+            // El plan se gestiona desde el módulo de facturación
+            // No se actualiza aquí para evitar inconsistencias
           }
         })
       }
