@@ -4,18 +4,19 @@
 # Este es un script de prueba inicial
 
 # Configuración de logs
-set("log.file.path", "/var/log/liquidsoap/liquidsoap.log")
-set("log.level", 3)
+settings.log.file.set(true)
+settings.log.file.path.set("/var/log/liquidsoap/liquidsoap.log")
+settings.log.level.set(3)
 
 # Configuración de servidor telnet para control remoto
-set("server.telnet", true)
-set("server.telnet.bind_addr", "0.0.0.0")
-set("server.telnet.port", 1234)
+settings.server.telnet.set(true)
+settings.server.telnet.bind_addr.set("0.0.0.0")
+settings.server.telnet.port.set(1234)
 
-# Variables de entorno
-icecast_host = getenv("ICECAST_HOST")
-icecast_port = int_of_string(getenv("ICECAST_PORT"))
-icecast_password = getenv("ICECAST_PASSWORD")
+# Variables de entorno con valores por defecto
+icecast_host = environment.get("ICECAST_HOST", default="icecast")
+icecast_port = int_of_string(default=8000, environment.get("ICECAST_PORT", default="8000"))
+icecast_password = environment.get("ICECAST_PASSWORD", default="hackme")
 
 # Log de inicio
 log("IPStream Liquidsoap iniciando...")
@@ -39,8 +40,8 @@ playlist_with_crossfade = crossfade(
 )
 
 # Normalizar volumen
-normalized = normalize(
-  target=-14.0,
+normalized = amplify(
+  1.0,
   playlist_with_crossfade
 )
 

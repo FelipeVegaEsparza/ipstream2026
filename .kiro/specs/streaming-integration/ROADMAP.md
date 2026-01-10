@@ -14,13 +14,16 @@
 - [x] Análisis de requerimientos
 - [x] Definición de arquitectura
 - [x] Documento de requirements creado
+- [x] Configuración de entorno Docker para desarrollo
+- [x] Docker Compose con Icecast + Liquidsoap funcionando
+- [x] Documentación de instalación y configuración
+- [x] Script de Liquidsoap básico funcionando
 
 ### 🔄 En Progreso
-- [ ] Configuración de entorno Docker para desarrollo
+- [ ] Agregar audio de prueba y verificar reproducción completa
 
 ### ⏳ Pendiente
-- [ ] Investigación técnica de Liquidsoap
-- [ ] Pruebas de concepto con Icecast
+- [ ] Investigación técnica avanzada de Liquidsoap
 - [ ] Definición de estructura de base de datos
 - [ ] Configuración de VPS de prueba
 
@@ -72,14 +75,14 @@ Tener un stream básico funcionando con Icecast y Liquidsoap controlado desde el
 - [ ] Probar reproducción básica
 
 **Entregables:**
-- [ ] Docker Compose funcional con MySQL + Icecast + Liquidsoap
+- [x] Docker Compose funcional con MySQL + Icecast + Liquidsoap
 - [ ] Base de datos con modelos creados
-- [ ] Stream de prueba reproduciendo audio
+- [x] Stream de prueba reproduciendo audio (conectado, pendiente audio)
 
 **Criterio de Éxito:**
 - ✅ Puedo levantar todo con `docker-compose up`
-- ✅ Puedo escuchar un stream en http://localhost:8000/test
-- ✅ La base de datos tiene todas las tablas necesarias
+- ✅ Puedo escuchar un stream en http://localhost:8000/test (conectado, sin audio aún)
+- ⏳ La base de datos tiene todas las tablas necesarias
 
 ---
 
