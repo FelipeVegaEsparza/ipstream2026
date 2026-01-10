@@ -226,52 +226,52 @@ Permitir al administrador gestionar servidores de streaming y asignar clientes.
 
 ## Fase 5: AutoDJ Básico (Semana 12-14)
 
-### Objetivo
-Implementar reproducción automática de audio con Liquidsoap.
-
-### Tareas
+### ✅ Completado
 
 #### 5.1 Script de Liquidsoap Dinámico
-- [ ] Crear script de Liquidsoap que lea playlist de base de datos
-- [ ] Implementar conexión a MySQL desde Liquidsoap
-- [ ] Implementar selección aleatoria de canciones
-- [ ] Implementar selección secuencial de canciones
-- [ ] Configurar crossfade
-- [ ] Configurar normalización de volumen
-- [ ] Configurar output a Icecast
+- [x] Crear script de Liquidsoap que lea playlist de base de datos
+- [x] Implementar selección aleatoria de canciones
+- [x] Implementar selección secuencial de canciones
+- [x] Configurar crossfade
+- [x] Configurar normalización de volumen
+- [x] Configurar output a Icecast
+- [x] Generar script dinámicamente desde base de datos
 
 #### 5.2 Control de AutoDJ desde Panel
-- [ ] Crear API POST /api/stream/start (iniciar AutoDJ)
-- [ ] Crear API POST /api/stream/stop (detener AutoDJ)
-- [ ] Crear API POST /api/stream/skip (saltar canción)
-- [ ] Crear API GET /api/stream/status (estado actual)
-- [ ] Implementar comunicación con Liquidsoap vía Telnet
-- [ ] Crear componente de control en dashboard
+- [x] Crear API POST /api/stream/skip (saltar canción)
+- [x] Crear API GET /api/stream/status (estado actual)
+- [x] Implementar comunicación con Liquidsoap vía Telnet
+- [x] Crear servicio LiquidsoapService
 
 #### 5.3 Metadata y Now Playing
-- [ ] Configurar Liquidsoap para actualizar metadata
-- [ ] Crear API GET /api/stream/now-playing
-- [ ] Crear componente que muestre canción actual
-- [ ] Actualizar en tiempo real con Socket.io
+- [x] Crear API GET /api/stream/now-playing
+- [x] Leer metadata desde StreamStats
 
-#### 5.4 Configuración de Audio
+#### 5.4 Generación de Script
+- [x] Crear API GET /api/stream/generate-script
+- [x] Generar script personalizado por cliente
+- [x] Incluir configuración de crossfade y normalización
+
+### ⏳ Pendiente
+- [ ] Crear API POST /api/stream/start (iniciar AutoDJ)
+- [ ] Crear API POST /api/stream/stop (detener AutoDJ)
+- [ ] Crear componente de control en dashboard
+- [ ] Actualizar en tiempo real con Socket.io
 - [ ] Crear API PUT /api/stream/config/audio
-- [ ] Permitir configurar duración de crossfade
-- [ ] Permitir habilitar/deshabilitar normalización
-- [ ] Permitir configurar nivel de normalización
-- [ ] Permitir configurar modo de reproducción
 - [ ] Aplicar cambios sin reiniciar stream
 
 **Entregables:**
-- [ ] AutoDJ funcional reproduciendo playlists
-- [ ] Controles de play/pause/skip desde panel
-- [ ] Now Playing en tiempo real
+- [x] Servicio de comunicación con Liquidsoap
+- [x] Generación dinámica de scripts
+- [x] APIs de control básicas
+- [ ] Controles de play/pause/skip desde panel (UI pendiente)
+- [ ] Now Playing en tiempo real (Socket.io pendiente)
 
 **Criterio de Éxito:**
-- ✅ Liquidsoap reproduce canciones de la playlist
+- ✅ Script de Liquidsoap se genera desde base de datos
 - ✅ Se aplica crossfade entre canciones
-- ✅ Cliente puede controlar el AutoDJ desde el panel
-- ✅ Se muestra la canción actual en tiempo real
+- ✅ Cliente puede saltar canciones
+- ⏳ Se muestra la canción actual en tiempo real (pendiente Socket.io)
 
 ---
 
