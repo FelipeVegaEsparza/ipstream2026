@@ -23,10 +23,54 @@ Panel completo de gestión de contenido para radio y streaming con API REST púb
 
 ## Instalación
 
+### Opción 1: Con Docker (Recomendado para desarrollo local)
+
 1. **Clonar el repositorio**
 ```bash
-git clone <repository-url>
-cd ipstream-panel
+git clone https://github.com/FelipeVegaEsparza/ipstream2026.git
+cd ipstream2026
+```
+
+2. **Instalar dependencias**
+```bash
+npm install
+```
+
+3. **Levantar MySQL con Docker**
+```bash
+docker-compose up -d
+```
+
+4. **Configurar la base de datos**
+```bash
+# Generar el cliente de Prisma
+npm run db:generate
+
+# Crear las tablas
+npm run db:push
+
+# Crear usuario administrador
+npm run db:seed
+```
+
+5. **Ejecutar en desarrollo**
+```bash
+npm run dev
+```
+
+6. **Acceder a la aplicación**
+- URL: http://localhost:3000
+- Email: admin@ipstream.cl
+- Password: admin123
+
+**Ver la guía completa de Docker en [README-DOCKER.md](./README-DOCKER.md)**
+
+### Opción 2: Con MySQL local
+
+1. **Clonar el repositorio**
+```bash
+git clone https://github.com/FelipeVegaEsparza/ipstream2026.git
+cd ipstream2026
 ```
 
 2. **Instalar dependencias**
@@ -51,11 +95,11 @@ NEXTAUTH_SECRET="your-secret-key-here"
 # Generar el cliente de Prisma
 npm run db:generate
 
-# Ejecutar migraciones
-npm run db:migrate
-
-# O usar push para desarrollo
+# Crear las tablas
 npm run db:push
+
+# Crear usuario administrador
+npm run db:seed
 ```
 
 5. **Ejecutar en desarrollo**
@@ -222,6 +266,7 @@ npm run db:push      # Push del schema a la DB
 npm run db:migrate   # Ejecutar migraciones
 npm run db:generate  # Generar cliente Prisma
 npm run db:studio    # Abrir Prisma Studio
+npm run db:seed      # Crear usuario administrador
 ```
 
 ## Deployment

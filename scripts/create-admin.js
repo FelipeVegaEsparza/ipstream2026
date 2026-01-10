@@ -1,52 +1,42 @@
-const { PrismaClient } = require('@prisma/client')
-const bcrypt = require('bcryptjs')
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-async function createAdmin() {
+async function main() {
   try {
-    // Datos del administrador
-    const adminData = {
-      email: 'admin@ipstream.com',
-      password: 'admin123456', // Cambia esta contraseña
-      name: 'Administrador Principal'
+    // Verificar si ya existe un admin
+    const existingAdmin = await prisma.user.findFirst({
+      where: { role: 'ADMIN' }
+    });
+
+    if (existingAdmin) {
+      console.log('✓ Ya existe un usuario administrador');
+      console.log('Email:', existingAdmin.email);
+      return;
     }
 
-    // Verificar si ya existe
-    const existingUser = await prisma.user.findUnique({
-      where: { email: adminData.email }
-    })
-
-    if (existingUser) {
-      console.log('❌ Ya existe un usuario con ese email')
-      return
-    }
-
-    // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(adminData.password, 12)
-
-    // Crear el usuario administrador
+    // Crear usuario admin
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    
     const admin = await prisma.user.create({
       data: {
-        email: adminData.email,
+        email: 'admin@ipstream.cl',
         password: hashedPassword,
-        name: adminData.name,
+        name: 'Administrador',
         role: 'ADMIN'
       }
-    })
+    });
 
-    console.log('✅ Usuario administrador creado exitosamente:')
-    console.log(`📧 Email: ${admin.email}`)
-    console.log(`👤 Nombre: ${admin.name}`)
-    console.log(`🔑 Contraseña: ${adminData.password}`)
-    console.log(`🎯 Rol: ${admin.role}`)
-    console.log('\n🚀 Ya puedes iniciar sesión en /auth/signin')
-
+    console.log('✓ Usuario administrador creado exitosamente');
+    console.log('Email:', admin.email);
+    console.log('Password: admin123');
+    console.log('\n⚠️  IMPORTANTE: Cambia esta contraseña después del primer login');
   } catch (error) {
-    console.error('❌ Error al crear administrador:', error)
+    console.error('Error al crear usuario administrador:', error);
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
 }
 
-createAdmin()
+main();
