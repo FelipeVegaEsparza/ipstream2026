@@ -46,6 +46,14 @@ model Client {
   promotions      Promotion[]
   podcasts        Podcast[]
   payments        Payment[]
+  
+  // Relaciones de Streaming
+  streamConfig    StreamConfig?
+  audioFiles      AudioFile[]
+  playlists       Playlist[]
+  schedules       Schedule[]
+  streamStats     StreamStats[]
+  liveSessions    LiveSession[]
 
   @@map("clients")
 }
@@ -257,3 +265,231 @@ model Payment {
 // Subscription status: "active" | "cancelled" | "expired" | "pending"
 // Payment status: "pending" | "completed" | "failed" | "refunded"
 // Payment methods: "credit_card" | "bank_transfer" | "paypal" | "other"
+
+
+// ============================================
+// MODELOS PARA SISTEMA DE STREAMING
+// ============================================
+
+// Servidor de Streaming (VPS donde corre Icecast + Liquidsoap)
+model StreamServer {
+  id          String   @id @default(cuid())
+  name        String   // Nombre descriptivo (ej: "VPS-Stream-1")
+  host        String   // IP o dominio del servidor
+  port        Int      @default(8000) // Puerto de Icecast
+  capacity    Int      // Número máximo de clientes que puede manejar
+  currentLoad Int      @default(0) // Clientes actualmente asignados
+  status      String   @default("online") // "online" | "offline" | "maintenance"
+  region      String?  // Región geográfica (ej: "us-east", "eu-west")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  streamConfigs StreamConfig[]
+
+  @@map("stream_servers")
+}
+
+// Configuración de Streaming por Cliente
+model StreamConfig {
+  id                String   @id @default(cuid())
+  clientId          String   @unique
+  serverId          String   // Servidor asignado
+  mountpoint        String   // Mountpoint único (ej: "/radio_clientid")
+  
+  // Configuración de calidades
+  bitrates          String   // JSON array: ["64", "128", "320"]
+  maxListeners      Int      @default(100) // Límite de oyentes simultáneos
+  
+  // Configuración de AutoDJ
+  autodjEnabled     Boolean  @default(true)
+  crossfadeDuration Float    @default(3.0) // Duración del crossfade en segundos
+  normalizeAudio    Boolean  @default(true)
+  normalizationLevel Float   @default(-14.0) // LUFS
+  playbackMode      String   @default("random") // "random" | "sequential"
+  
+  // Configuración de Live Input
+  liveInputEnabled  Boolean  @default(true)
+  liveInputPassword String   // Contraseña para conectarse en vivo
+  
+  // Configuración de Jingles
+  jinglesEnabled    Boolean  @default(false)
+  jinglesFrequency  Int      @default(5) // Cada X canciones
+  
+  // Estado
+  status            String   @default("inactive") // "active" | "inactive" | "error"
+  lastError         String?  @db.Text
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  client       Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  server       StreamServer @relation(fields: [serverId], references: [id])
+
+  @@map("stream_configs")
+}
+
+// Archivo de Audio
+model AudioFile {
+  id          String   @id @default(cuid())
+  clientId    String
+  
+  // Información del archivo
+  filename    String   // Nombre original del archivo
+  storagePath String   // Ruta en el servidor de streaming
+  fileSize    Int      // Tamaño en bytes
+  duration    Float    // Duración en segundos
+  
+  // Metadata
+  title       String?
+  artist      String?
+  album       String?
+  genre       String?
+  year        Int?
+  coverUrl    String?  // URL del cover art
+  
+  // Información técnica
+  format      String   // "mp3" | "aac" | "ogg"
+  bitrate     Int      // Bitrate original
+  sampleRate  Int      // Sample rate (ej: 44100)
+  channels    Int      // Número de canales (1=mono, 2=stereo)
+  
+  // Estado
+  status      String   @default("processing") // "processing" | "ready" | "error"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  playlistItems PlaylistItem[]
+
+  @@index([clientId])
+  @@map("audio_files")
+}
+
+// Playlist
+model Playlist {
+  id          String   @id @default(cuid())
+  clientId    String
+  name        String
+  type        String   @default("rotation") // "rotation" | "special" | "jingles"
+  description String?  @db.Text
+  isMain      Boolean  @default(false) // Playlist principal para AutoDJ
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  client    Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items     PlaylistItem[]
+  schedules Schedule[]
+
+  @@index([clientId])
+  @@map("playlists")
+}
+
+// Item de Playlist (relación muchos a muchos entre Playlist y AudioFile)
+model PlaylistItem {
+  id          String   @id @default(cuid())
+  playlistId  String
+  audioFileId String
+  order       Int      // Orden en la playlist
+  
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  playlist  Playlist  @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  audioFile AudioFile @relation(fields: [audioFileId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, audioFileId])
+  @@index([playlistId])
+  @@map("playlist_items")
+}
+
+// Programación Horaria
+model Schedule {
+  id         String   @id @default(cuid())
+  clientId   String
+  playlistId String
+  
+  // Configuración de horario
+  dayOfWeek  Int      // 0=Domingo, 1=Lunes, ..., 6=Sábado
+  startTime  String   // Formato: "HH:MM"
+  endTime    String   // Formato: "HH:MM"
+  
+  // Estado
+  isActive   Boolean  @default(true)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relaciones
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([dayOfWeek])
+  @@map("schedules")
+}
+
+// Estadísticas de Streaming
+model StreamStats {
+  id              String   @id @default(cuid())
+  clientId        String
+  
+  // Estadísticas
+  timestamp       DateTime @default(now())
+  listeners       Int      // Oyentes en ese momento
+  peakListeners   Int      // Pico de oyentes del día
+  currentSong     String?  // Canción actual
+  
+  // Distribución por calidad
+  listeners64     Int      @default(0)
+  listeners128    Int      @default(0)
+  listeners320    Int      @default(0)
+  
+  // Estado del stream
+  streamStatus    String   // "online" | "offline"
+  uptime          Int      @default(0) // Tiempo en línea en segundos
+
+  // Relaciones
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, timestamp])
+  @@map("stream_stats")
+}
+
+// Sesión de Transmisión en Vivo
+model LiveSession {
+  id          String    @id @default(cuid())
+  clientId    String
+  
+  // Información de la sesión
+  djName      String?   // Nombre del DJ (opcional)
+  startTime   DateTime  @default(now())
+  endTime     DateTime?
+  duration    Int?      // Duración en segundos
+  
+  // Estadísticas
+  peakListeners Int     @default(0)
+  avgListeners  Int     @default(0)
+  
+  createdAt   DateTime  @default(now())
+
+  // Relaciones
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@map("live_sessions")
+}
+
+// Valores posibles para enums:
+// StreamServer.status: "online" | "offline" | "maintenance"
+// StreamConfig.status: "active" | "inactive" | "error"
+// StreamConfig.playbackMode: "random" | "sequential"
+// Playlist.type: "rotation" | "special" | "jingles"
+// AudioFile.status: "processing" | "ready" | "error"
+// AudioFile.format: "mp3" | "aac" | "ogg"
+// StreamStats.streamStatus: "online" | "offline"
