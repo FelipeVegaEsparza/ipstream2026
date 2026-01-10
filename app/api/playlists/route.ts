@@ -140,7 +140,10 @@ export async function POST(req: NextRequest) {
     const playlist = await prisma.playlist.create({
       data: {
         clientId,
-        ...validatedData,
+        name: validatedData.name,
+        type: validatedData.type,
+        description: validatedData.description,
+        isMain: validatedData.isMain,
       },
     });
 
