@@ -238,6 +238,8 @@ Permitir al administrador gestionar servidores de streaming y asignar clientes.
 - [x] Generar script dinámicamente desde base de datos
 
 #### 5.2 Control de AutoDJ desde Panel
+- [x] Crear API POST /api/stream/start (iniciar AutoDJ)
+- [x] Crear API POST /api/stream/stop (detener AutoDJ)
 - [x] Crear API POST /api/stream/skip (saltar canción)
 - [x] Crear API GET /api/stream/status (estado actual)
 - [x] Implementar comunicación con Liquidsoap vía Telnet
@@ -245,33 +247,37 @@ Permitir al administrador gestionar servidores de streaming y asignar clientes.
 
 #### 5.3 Metadata y Now Playing
 - [x] Crear API GET /api/stream/now-playing
+- [x] Crear API GET /api/stream/history
 - [x] Leer metadata desde StreamStats
 
-#### 5.4 Generación de Script
-- [x] Crear API GET /api/stream/generate-script
-- [x] Generar script personalizado por cliente
-- [x] Incluir configuración de crossfade y normalización
+#### 5.4 Configuración de Audio
+- [x] Crear API PUT /api/stream/config/audio
+- [x] Crear API GET /api/stream/config/audio
+- [x] Permitir configurar duración de crossfade
+- [x] Permitir habilitar/deshabilitar normalización
+- [x] Permitir configurar nivel de normalización
+- [x] Permitir configurar modo de reproducción
 
-### ⏳ Pendiente
-- [ ] Crear API POST /api/stream/start (iniciar AutoDJ)
-- [ ] Crear API POST /api/stream/stop (detener AutoDJ)
+### ⏳ Pendiente (UI)
 - [ ] Crear componente de control en dashboard
 - [ ] Actualizar en tiempo real con Socket.io
-- [ ] Crear API PUT /api/stream/config/audio
-- [ ] Aplicar cambios sin reiniciar stream
+- [ ] Aplicar cambios sin reiniciar stream (requiere integración con Docker)
 
 **Entregables:**
 - [x] Servicio de comunicación con Liquidsoap
 - [x] Generación dinámica de scripts
-- [x] APIs de control básicas
-- [ ] Controles de play/pause/skip desde panel (UI pendiente)
+- [x] APIs de control completas (start, stop, skip, status)
+- [x] APIs de configuración de audio
+- [x] API de historial de reproducción
+- [ ] Controles desde panel (UI pendiente)
 - [ ] Now Playing en tiempo real (Socket.io pendiente)
 
 **Criterio de Éxito:**
 - ✅ Script de Liquidsoap se genera desde base de datos
 - ✅ Se aplica crossfade entre canciones
-- ✅ Cliente puede saltar canciones
-- ⏳ Se muestra la canción actual en tiempo real (pendiente Socket.io)
+- ✅ Cliente puede iniciar/detener/saltar canciones
+- ✅ Cliente puede configurar audio (crossfade, normalización, modo)
+- ✅ Se puede consultar historial de reproducción
 
 ---
 
