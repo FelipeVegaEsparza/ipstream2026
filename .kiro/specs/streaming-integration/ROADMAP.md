@@ -185,41 +185,42 @@ Permitir al administrador gestionar servidores de streaming y asignar clientes.
 
 ## Fase 4: Gestión de Playlists (Semana 10-11)
 
-### Objetivo
-Permitir crear y gestionar playlists para organizar el contenido.
-
-### Tareas
+### ✅ Completado
 
 #### 4.1 CRUD de Playlists
-- [ ] Crear API POST /api/playlists
-- [ ] Crear API GET /api/playlists
-- [ ] Crear API GET /api/playlists/[id]
-- [ ] Crear API PUT /api/playlists/[id]
-- [ ] Crear API DELETE /api/playlists/[id]
-- [ ] Validar que playlist no esté en uso antes de eliminar
+- [x] Crear API POST /api/playlists
+- [x] Crear API GET /api/playlists
+- [x] Crear API GET /api/playlists/[id]
+- [x] Crear API PUT /api/playlists/[id]
+- [x] Crear API DELETE /api/playlists/[id]
+- [x] Validar que playlist no esté en uso antes de eliminar
 
 #### 4.2 Gestión de Canciones en Playlist
-- [ ] Crear API POST /api/playlists/[id]/items (agregar canción)
-- [ ] Crear API DELETE /api/playlists/[id]/items/[itemId] (quitar canción)
-- [ ] Crear API PUT /api/playlists/[id]/reorder (reordenar)
-- [ ] Calcular duración total de playlist
+- [x] Crear API POST /api/playlists/[id]/items (agregar canción)
+- [x] Crear API DELETE /api/playlists/[id]/items/[itemId] (quitar canción)
+- [x] Crear API PUT /api/playlists/[id]/reorder (reordenar)
+- [x] Calcular duración total de playlist
+- [x] Crear API POST /api/playlists/[id]/duplicate (duplicar)
 
 #### 4.3 Componentes de UI
 - [ ] Crear componente de lista de playlists
 - [ ] Crear formulario de crear/editar playlist
 - [ ] Crear componente de gestión de canciones con drag & drop
 - [ ] Mostrar duración total
-- [ ] Permitir duplicar playlists
 - [ ] Marcar playlist como "Principal"
 
 **Entregables:**
-- [ ] Sistema completo de gestión de playlists
-- [ ] Interfaz intuitiva con drag & drop
+- [x] Sistema completo de gestión de playlists (APIs)
+- [x] Lógica de duplicación
+- [x] Validaciones y seguridad
+- [ ] Interfaz intuitiva con drag & drop (pendiente)
 
 **Criterio de Éxito:**
 - ✅ Cliente puede crear playlists
 - ✅ Cliente puede agregar/quitar/reordenar canciones
 - ✅ Se calcula la duración total correctamente
+- ✅ Se puede duplicar playlists
+- ✅ Solo una playlist puede ser principal
 
 ---
 
