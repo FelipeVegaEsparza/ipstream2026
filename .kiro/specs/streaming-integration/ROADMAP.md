@@ -283,38 +283,46 @@ Permitir al administrador gestionar servidores de streaming y asignar clientes.
 
 ## Fase 6: Programación Horaria (Semana 15-16)
 
-### Objetivo
-Permitir programar diferentes playlists según día y hora.
-
-### Tareas
+### ✅ Completado
 
 #### 6.1 CRUD de Programación
-- [ ] Crear API POST /api/schedule
-- [ ] Crear API GET /api/schedule
-- [ ] Crear API PUT /api/schedule/[id]
-- [ ] Crear API DELETE /api/schedule/[id]
-- [ ] Validar que no haya solapamiento de horarios
+- [x] Crear API POST /api/schedule
+- [x] Crear API GET /api/schedule
+- [x] Crear API PUT /api/schedule/[id]
+- [x] Crear API DELETE /api/schedule/[id]
+- [x] Validar que no haya solapamiento de horarios
 
 #### 6.2 Lógica de Cambio Automático
+- [x] Crear API GET /api/schedule/current
+- [x] Detectar programación activa según día y hora
+- [x] Usar playlist principal cuando no hay programación
+
+#### 6.3 Funcionalidades Adicionales
+- [x] Crear API POST /api/schedule/copy
+- [x] Copiar programación entre días
+- [x] Validación de horarios (endTime > startTime)
+- [x] Prevenir solapamientos
+
+### ⏳ Pendiente (UI y Liquidsoap)
 - [ ] Implementar en Liquidsoap detección de horario
 - [ ] Cambiar playlist según programación
 - [ ] Manejar transiciones suaves entre bloques
-- [ ] Usar playlist principal cuando no hay programación
-
-#### 6.3 Componentes de UI
 - [ ] Crear componente de calendario de programación
 - [ ] Crear formulario de agregar bloque
-- [ ] Permitir copiar programación entre días
 - [ ] Vista semanal de programación
 
 **Entregables:**
-- [ ] Sistema de programación horaria funcional
-- [ ] Calendario visual de programación
+- [x] Sistema de programación horaria funcional (APIs)
+- [x] Validación de solapamientos
+- [x] Copia de programación entre días
+- [ ] Calendario visual de programación (UI pendiente)
+- [ ] Integración con Liquidsoap (pendiente)
 
 **Criterio de Éxito:**
 - ✅ Cliente puede programar playlists por día/hora
-- ✅ Liquidsoap cambia automáticamente según horario
-- ✅ No hay solapamientos de horarios
+- ✅ Se valida que no haya solapamientos
+- ✅ Se puede copiar programación entre días
+- ⏳ Liquidsoap cambia automáticamente según horario (pendiente)
 
 ---
 
