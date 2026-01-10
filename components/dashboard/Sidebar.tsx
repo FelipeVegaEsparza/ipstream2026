@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { 
@@ -17,13 +17,28 @@ import {
   CodeBracketIcon,
   InformationCircleIcon,
   SpeakerWaveIcon,
-  PlayIcon
+  PlayIcon,
+  MusicalNoteIcon,
+  SignalIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Datos Básicos', href: '/dashboard/basic-data', icon: Cog6ToothIcon },
   { name: 'Redes Sociales', href: '/dashboard/social-networks', icon: ShareIcon },
+  { 
+    name: 'Streaming', 
+    href: '/dashboard/streaming', 
+    icon: SignalIcon,
+    badge: 'Nuevo',
+    children: [
+      { name: 'Control', href: '/dashboard/streaming', icon: PlayIcon },
+      { name: 'Biblioteca', href: '/dashboard/streaming/audio', icon: MusicalNoteIcon },
+      { name: 'Playlists', href: '/dashboard/streaming/playlists', icon: SpeakerWaveIcon },
+      { name: 'Programación', href: '/dashboard/streaming/schedule', icon: MicrophoneIcon },
+      { name: 'Estadísticas', href: '/dashboard/streaming/stats', icon: SignalIcon },
+    ]
+  },
   { name: 'Programas', href: '/dashboard/programs', icon: MicrophoneIcon },
   { name: 'Noticias', href: '/dashboard/news', icon: DocumentTextIcon },
   { name: 'Podcasts', href: '/dashboard/podcasts', icon: SpeakerWaveIcon },
@@ -42,6 +57,7 @@ interface SidebarProps {
 
 function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname()
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
 
   return (
     <div className="flex grow flex-col gap-y-5 overflow-y-auto gradient-bg px-6 pb-4 shadow-2xl border-r border-gray-700">
@@ -58,26 +74,87 @@ function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
             <ul role="list" className="space-y-2">
               {navigation.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                const hasChildren = 'children' in item && item.children
+                const isOpen = openSubmenu === item.name
+                
                 return (
                   <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      onClick={onLinkClick}
-                      className={`sidebar-item group ${
-                        isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
-                      }`}
-                    >
-                      <item.icon
-                        className={`h-6 w-6 shrink-0 transition-colors ${
-                          isActive ? 'text-cyan-400' : 'text-gray-400 group-hover:text-cyan-400'
+                    {hasChildren ? (
+                      <>
+                        <button
+                          onClick={() => setOpenSubmenu(isOpen ? null : item.name)}
+                          className={`sidebar-item group w-full ${
+                            isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
+                          }`}
+                        >
+                          <item.icon
+                            className={`h-6 w-6 shrink-0 transition-colors ${
+                              isActive ? 'text-cyan-400' : 'text-gray-400 group-hover:text-cyan-400'
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span className="truncate flex-1 text-left">{item.name}</span>
+                          {item.badge && (
+                            <span className="px-2 py-0.5 text-xs bg-cyan-500/20 text-cyan-400 rounded-full border border-cyan-500/30">
+                              {item.badge}
+                            </span>
+                          )}
+                          <svg
+                            className={`h-5 w-5 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                        {isOpen && (
+                          <ul className="mt-2 space-y-1 ml-4 border-l-2 border-gray-700 pl-4">
+                            {item.children.map((child) => {
+                              const isChildActive = pathname === child.href
+                              return (
+                                <li key={child.name}>
+                                  <Link
+                                    href={child.href}
+                                    onClick={onLinkClick}
+                                    className={`sidebar-item group text-sm ${
+                                      isChildActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
+                                    }`}
+                                  >
+                                    <child.icon
+                                      className={`h-5 w-5 shrink-0 transition-colors ${
+                                        isChildActive ? 'text-cyan-400' : 'text-gray-400 group-hover:text-cyan-400'
+                                      }`}
+                                      aria-hidden="true"
+                                    />
+                                    <span className="truncate">{child.name}</span>
+                                  </Link>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        )}
+                      </>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        onClick={onLinkClick}
+                        className={`sidebar-item group ${
+                          isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
                         }`}
-                        aria-hidden="true"
-                      />
-                      <span className="truncate">{item.name}</span>
-                      {isActive && (
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-l-full"></div>
-                      )}
-                    </Link>
+                      >
+                        <item.icon
+                          className={`h-6 w-6 shrink-0 transition-colors ${
+                            isActive ? 'text-cyan-400' : 'text-gray-400 group-hover:text-cyan-400'
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">{item.name}</span>
+                        {isActive && (
+                          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-l-full"></div>
+                        )}
+                      </Link>
+                    )}
                   </li>
                 )
               })}
