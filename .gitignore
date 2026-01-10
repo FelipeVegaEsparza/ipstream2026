@@ -56,3 +56,18 @@ jspm_packages/
 
 # Yarn Integrity file
 .yarn-integrity
+
+# Docker volumes and logs
+docker/liquidsoap/scripts/*.log
+docker/icecast/*.log
+
+# Audio files (no subir archivos de audio al repo)
+audio/
+*.mp3
+*.aac
+*.ogg
+*.wav
+*.flac
+
+# Uploads
+public/uploads/

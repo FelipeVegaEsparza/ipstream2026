@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: ipstream_mysql_dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: pipstream
+      MYSQL_USER: pipstream_user
+      MYSQL_PASSWORD: pipstream_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - ipstream_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Servidor de Streaming Icecast
+  icecast:
+    image: moul/icecast
+    container_name: ipstream_icecast_dev
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # Puerto web de Icecast
+    volumes:
+      - ./docker/icecast/icecast.xml:/etc/icecast2/icecast.xml
+      - icecast_logs:/var/log/icecast2
+    networks:
+      - ipstream_network
+    environment:
+      - ICECAST_SOURCE_PASSWORD=hackme
+      - ICECAST_RELAY_PASSWORD=hackme
+      - ICECAST_ADMIN_PASSWORD=hackme
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status.xsl"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Motor de AutoDJ Liquidsoap
+  liquidsoap:
+    build:
+      context: ./docker/liquidsoap
+      dockerfile: Dockerfile
+    container_name: ipstream_liquidsoap_dev
+    restart: unless-stopped
+    volumes:
+      - ./docker/liquidsoap/scripts:/scripts
+      - audio_storage:/audio
+      - liquidsoap_logs:/var/log/liquidsoap
+    networks:
+      - ipstream_network
+    depends_on:
+      - icecast
+      - mysql
+    environment:
+      - ICECAST_HOST=icecast
+      - ICECAST_PORT=8000
+      - ICECAST_PASSWORD=hackme
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=pipstream_user
+      - MYSQL_PASSWORD=pipstream_pass
+      - MYSQL_DATABASE=pipstream
+
+  # Redis para caché y colas
+  redis:
+    image: redis:7-alpine
+    container_name: ipstream_redis_dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ipstream_network
+    command: redis-server --appendonly yes
+
+volumes:
+  mysql_data:
+    driver: local
+  audio_storage:
+    driver: local
+  icecast_logs:
+    driver: local
+  liquidsoap_logs:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ipstream_network:
+    driver: bridge
