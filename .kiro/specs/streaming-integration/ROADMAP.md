@@ -131,49 +131,49 @@ Permitir al administrador gestionar servidores de streaming y asignar clientes.
 
 ## Fase 3: Gestión de Biblioteca de Audio (Semana 7-9)
 
-### Objetivo
-Permitir a los clientes subir, gestionar y organizar sus archivos de audio.
-
-### Tareas
+### ✅ Completado
 
 #### 3.1 Sistema de Subida de Archivos
-- [ ] Crear API POST /api/audio/upload
-- [ ] Configurar Multer para manejo de archivos
-- [ ] Validar formato de audio (MP3, AAC, OGG)
-- [ ] Validar tamaño máximo (50MB)
-- [ ] Validar espacio disponible del cliente
-- [ ] Almacenar archivo en volumen Docker
-- [ ] Crear registro en base de datos
+- [x] Crear API POST /api/audio/upload
+- [x] Configurar manejo de archivos con FormData
+- [x] Validar formato de audio (MP3, AAC, OGG)
+- [x] Validar tamaño máximo (50MB)
+- [x] Validar espacio disponible del cliente
+- [x] Almacenar archivo en volumen Docker
+- [x] Crear registro en base de datos
 
 #### 3.2 Extracción de Metadata
-- [ ] Instalar y configurar FFmpeg en Docker
-- [ ] Crear servicio de extracción de metadata
-- [ ] Extraer: título, artista, álbum, duración, bitrate
-- [ ] Extraer cover art si existe
-- [ ] Guardar metadata en base de datos
+- [x] Instalar y configurar FFmpeg en Docker
+- [x] Crear servicio de extracción de metadata
+- [x] Extraer: título, artista, álbum, duración, bitrate
+- [x] Extraer cover art si existe
+- [x] Guardar metadata en base de datos
 
 #### 3.3 Gestión de Biblioteca
-- [ ] Crear API GET /api/audio (listar archivos)
-- [ ] Crear API GET /api/audio/[id] (obtener detalle)
-- [ ] Crear API PUT /api/audio/[id] (editar metadata)
-- [ ] Crear API DELETE /api/audio/[id] (eliminar archivo)
-- [ ] Validar que archivo no esté en uso antes de eliminar
+- [x] Crear API GET /api/audio (listar archivos)
+- [x] Crear API GET /api/audio/[id] (obtener detalle)
+- [x] Crear API PUT /api/audio/[id] (editar metadata)
+- [x] Crear API DELETE /api/audio/[id] (eliminar archivo)
+- [x] Validar que archivo no esté en uso antes de eliminar
+- [x] Mostrar espacio usado/disponible
+
+#### 3.4 Subida Múltiple (Batch Upload)
+- [x] Permitir seleccionar múltiples archivos
+- [x] Mostrar progreso de cada archivo
+- [x] Manejar errores individuales sin detener el batch
+
+### ⏳ Pendiente
 - [ ] Crear componente de lista de archivos con tabla
 - [ ] Crear componente de subida con drag & drop
 - [ ] Crear componente de edición de metadata
-- [ ] Mostrar progreso de subida
-- [ ] Mostrar espacio usado/disponible
-
-#### 3.4 Subida Múltiple (Batch Upload)
-- [ ] Permitir seleccionar múltiples archivos
 - [ ] Crear cola de procesamiento con Bull
-- [ ] Mostrar progreso de cada archivo
-- [ ] Manejar errores individuales sin detener el batch
+- [ ] Integrar UI components en dashboard
 
 **Entregables:**
-- [ ] Sistema completo de subida de archivos
-- [ ] Biblioteca de audio con búsqueda y filtros
-- [ ] Edición de metadata funcional
+- [x] Sistema completo de subida de archivos
+- [x] Biblioteca de audio con búsqueda y filtros
+- [x] Edición de metadata funcional
+- [ ] UI components (pendiente)
 
 **Criterio de Éxito:**
 - ✅ Cliente puede subir archivos MP3

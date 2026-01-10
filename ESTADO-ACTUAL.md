@@ -1,7 +1,7 @@
 # Estado Actual del Proyecto - Sistema de Streaming Integrado
 
 **Fecha**: 2026-01-10  
-**Fase**: Fase 2 - Gestión de Servidores y Configuración  
+**Fase**: Fase 3 - Gestión de Biblioteca de Audio  
 **Progreso**: ✅ 100% completado
 
 ---
@@ -157,16 +157,17 @@ docker-compose -f docker-compose.dev.yml down
 4. ✅ Verificar reproducción de audio en el stream
 5. ⏳ **Probar el stream en tu navegador o VLC**
 
-### Corto Plazo (Esta Semana)
-1. Comenzar Fase 1: Modelo de Datos
-2. Diseñar esquema de Prisma para streaming
-3. Crear migraciones
-4. Implementar CRUD de servidores de streaming
+### Corto Plazo (Ahora)
+1. Comenzar Fase 4: Gestión de Playlists
+2. Implementar CRUD de playlists
+3. Implementar gestión de canciones en playlists
+4. Implementar reordenamiento con drag & drop
 
 ### Mediano Plazo (Próximas 2 Semanas)
-1. Completar Fase 1: Infraestructura Base
-2. Comenzar Fase 2: Gestión de Servidores
-3. Implementar API de configuración de streams
+1. Completar Fase 4: Playlists
+2. Comenzar Fase 5: AutoDJ Básico
+3. Integrar Liquidsoap con base de datos
+4. Implementar controles de reproducción
 
 ---
 
@@ -177,6 +178,8 @@ docker-compose -f docker-compose.dev.yml down
 | 0 | Preparación | 100% | ✅ Completado |
 | 1 | Infraestructura Base | 100% | ✅ Completado |
 | 2 | Gestión de Servidores | 100% | ✅ Completado |
+| 3 | Biblioteca de Audio | 100% | ✅ Completado |
+| 4 | Playlists | 0% | ⏳ Pendiente |
 | 3 | Biblioteca de Audio | 0% | ⏳ Pendiente |
 | 4 | Playlists | 0% | ⏳ Pendiente |
 | ... | ... | ... | ... |
