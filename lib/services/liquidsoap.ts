@@ -140,10 +140,24 @@ export class LiquidsoapService {
       throw new Error("No hay playlist principal o está vacía");
     }
 
-    // Generar lista de archivos
-    const audioFiles = mainPlaylist.items
-      .map((item) => item.audioFile.storagePath)
-      .join("\n");
+    // Obtener playlist de jingles si está habilitado
+    let jinglesPlaylist = null;
+    if (config.jinglesEnabled) {
+      jinglesPlaylist = await prisma.playlist.findFirst({
+        where: {
+          clientId,
+          type: "jingles",
+        },
+        include: {
+          items: {
+            include: {
+              audioFile: true,
+            },
+            orderBy: { order: "asc" },
+          },
+        },
+      });
+    }
 
     // Generar script
     const script = `#!/usr/bin/liquidsoap
@@ -158,17 +172,38 @@ settings.server.telnet.set(true)
 settings.server.telnet.bind_addr.set("0.0.0.0")
 settings.server.telnet.port.set(1234)
 
-# Playlist de archivos
-playlist_files = [
-${mainPlaylist.items.map((item) => `  "${item.audioFile.storagePath}",`).join("\n")}
-]
-
-# Crear playlist
-radio = playlist(
+# Playlist principal
+main_playlist = playlist(
   mode="${config.playbackMode === "random" ? "randomize" : "normal"}",
   reload_mode="watch",
-  playlist_files
+  [
+${mainPlaylist.items.map((item) => `    "${item.audioFile.storagePath}",`).join("\n")}
+  ]
 )
+
+${
+  config.jinglesEnabled && jinglesPlaylist && jinglesPlaylist.items.length > 0
+    ? `
+# Playlist de jingles
+jingles_playlist = playlist(
+  mode="randomize",
+  reload_mode="watch",
+  [
+${jinglesPlaylist.items.map((item) => `    "${item.audioFile.storagePath}",`).join("\n")}
+  ]
+)
+
+# Insertar jingles cada ${config.jinglesFrequency} canciones
+radio = rotate(
+  weights=[${config.jinglesFrequency}, 1],
+  [main_playlist, jingles_playlist]
+)
+`
+    : `
+# Radio sin jingles
+radio = main_playlist
+`
+}
 
 # Aplicar crossfade
 radio = crossfade(

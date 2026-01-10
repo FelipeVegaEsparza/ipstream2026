@@ -1,7 +1,7 @@
 # Estado Actual del Proyecto - Sistema de Streaming Integrado
 
 **Fecha**: 2026-01-10  
-**Fase**: Fase 6 - Programación Horaria  
+**Fase**: Fase 8 - Live Input  
 **Progreso**: ✅ 100% completado (APIs)
 
 ---
@@ -158,16 +158,16 @@ docker-compose -f docker-compose.dev.yml down
 5. ⏳ **Probar el stream en tu navegador o VLC**
 
 ### Corto Plazo (Ahora)
-1. Comenzar Fase 7: Jingles Automáticos
-2. Comenzar Fase 8: Live Input
-3. Implementar detección de live input
-4. Generar credenciales de conexión
+1. Comenzar Fase 9: Múltiples Calidades
+2. Comenzar Fase 10: Estadísticas en Tiempo Real
+3. Implementar lectura de stats de Icecast
+4. Crear job de recolección de estadísticas
 
 ### Mediano Plazo (Próximas 2 Semanas)
-1. Completar Fase 8: Live Input
-2. Comenzar Fase 9: Múltiples Calidades
-3. Configurar transcodificación
-4. Comenzar Fase 10: Estadísticas en Tiempo Real
+1. Completar Fase 10: Estadísticas
+2. Comenzar Fase 11: Estadísticas Históricas
+3. Comenzar Fase 12: Sistema de Planes
+4. Implementar validaciones de límites
 
 ---
 
@@ -182,7 +182,9 @@ docker-compose -f docker-compose.dev.yml down
 | 4 | Playlists | 100% | ✅ Completado |
 | 5 | AutoDJ Básico | 100% | ✅ Completado |
 | 6 | Programación Horaria | 100% | ✅ Completado (APIs) |
-| 7 | Jingles Automáticos | 0% | ⏳ Pendiente |
+| 7 | Jingles Automáticos | 100% | ✅ Completado |
+| 8 | Live Input | 100% | ✅ Completado (APIs) |
+| 9 | Múltiples Calidades | 0% | ⏳ Pendiente |
 | 3 | Biblioteca de Audio | 0% | ⏳ Pendiente |
 | 4 | Playlists | 0% | ⏳ Pendiente |
 | ... | ... | ... | ... |

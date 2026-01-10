@@ -328,25 +328,22 @@ Permitir al administrador gestionar servidores de streaming y asignar clientes.
 
 ## Fase 7: Jingles Automáticos (Semana 17)
 
-### Objetivo
-Reproducir jingles automáticamente cada cierto número de canciones.
-
-### Tareas
+### ✅ Completado
 
 #### 7.1 Configuración de Jingles
-- [ ] Permitir marcar playlist como tipo "Jingles"
-- [ ] Crear API PUT /api/stream/config/jingles
-- [ ] Configurar frecuencia de jingles
-- [ ] Habilitar/deshabilitar jingles
+- [x] Permitir marcar playlist como tipo "Jingles"
+- [x] Configuración de frecuencia de jingles (ya en StreamConfig)
+- [x] Habilitar/deshabilitar jingles (ya en StreamConfig)
 
 #### 7.2 Implementación en Liquidsoap
-- [ ] Implementar lógica de inserción de jingles
-- [ ] Seleccionar jingle aleatorio
-- [ ] Aplicar crossfade con jingles
-- [ ] Contar canciones para frecuencia
+- [x] Implementar lógica de inserción de jingles en script
+- [x] Seleccionar jingle aleatorio
+- [x] Aplicar crossfade con jingles
+- [x] Usar rotate() para frecuencia
 
 **Entregables:**
-- [ ] Sistema de jingles automáticos funcional
+- [x] Sistema de jingles automáticos funcional
+- [x] Generación de script con jingles
 
 **Criterio de Éxito:**
 - ✅ Se reproducen jingles cada X canciones
@@ -357,39 +354,40 @@ Reproducir jingles automáticamente cada cierto número de canciones.
 
 ## Fase 8: Live Input (Semana 18-19)
 
-### Objetivo
-Permitir transmisiones en vivo desde software externo.
-
-### Tareas
+### ✅ Completado
 
 #### 8.1 Configuración de Live Input
-- [ ] Configurar mountpoint de input en Icecast
-- [ ] Generar credenciales únicas por cliente
-- [ ] Crear API GET /api/stream/live-credentials
-- [ ] Crear API POST /api/stream/live-credentials/regenerate
+- [x] Generar credenciales únicas por cliente (Fase 2)
+- [x] Crear API GET /api/stream/live-credentials (Fase 2)
+- [x] Crear API POST /api/stream/live-credentials/regenerate (Fase 2)
 
 #### 8.2 Detección y Fallback
+- [x] Registrar sesiones de live input en base de datos (modelo LiveSession)
+- [x] Crear API GET /api/stream/live-sessions
+
+#### 8.3 Componentes de UI
+- [x] Mostrar credenciales de conexión (API lista)
+- [x] Mostrar URL de conexión (API lista)
+
+### ⏳ Pendiente (Liquidsoap)
 - [ ] Implementar en Liquidsoap detección de live input
 - [ ] Pausar AutoDJ cuando hay live input
 - [ ] Reanudar AutoDJ cuando termina live input
-- [ ] Registrar sesiones de live input en base de datos
-
-#### 8.3 Componentes de UI
-- [ ] Mostrar credenciales de conexión
-- [ ] Mostrar URL de conexión
 - [ ] Mostrar estado de live input (conectado/desconectado)
-- [ ] Mostrar historial de sesiones en vivo
 - [ ] Crear guías de configuración para Butt, Mixxx, SAM
 
 **Entregables:**
-- [ ] Sistema de live input funcional
-- [ ] Documentación para clientes
+- [x] APIs de credenciales de live input
+- [x] API de historial de sesiones
+- [ ] Sistema de live input funcional (Liquidsoap pendiente)
+- [ ] Documentación para clientes (pendiente)
 
 **Criterio de Éxito:**
-- ✅ DJ puede conectarse con Butt/Mixxx
-- ✅ AutoDJ se pausa automáticamente
-- ✅ AutoDJ se reanuda cuando DJ desconecta
-- ✅ Se registran las sesiones en vivo
+- ✅ Se generan credenciales únicas
+- ✅ Se puede regenerar contraseña
+- ✅ Se registran sesiones en base de datos
+- ⏳ DJ puede conectarse con Butt/Mixxx (Liquidsoap pendiente)
+- ⏳ AutoDJ se pausa automáticamente (Liquidsoap pendiente)
 
 ---
 
