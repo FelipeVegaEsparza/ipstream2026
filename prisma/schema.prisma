@@ -54,6 +54,8 @@ model Client {
   schedules       Schedule[]
   streamStats     StreamStats[]
   liveSessions    LiveSession[]
+  timeAnnouncements TimeAnnouncement[]
+  announcementConfig AnnouncementConfig?
 
   @@map("clients")
 }
@@ -493,3 +495,54 @@ model LiveSession {
 // AudioFile.status: "processing" | "ready" | "error"
 // AudioFile.format: "mp3" | "aac" | "ogg"
 // StreamStats.streamStatus: "online" | "offline"
+// TimeAnnouncement.type: "hour" | "half_hour" | "quarter_hour" | "custom"
+
+// Locuciones de Hora
+model TimeAnnouncement {
+  id          String   @id @default(cuid())
+  clientId    String
+  
+  // Información del archivo
+  filename    String   // Nombre original del archivo
+  storagePath String   // Ruta en el servidor
+  fileSize    Int      // Tamaño en bytes
+  duration    Float    // Duración en segundos
+  
+  // Configuración
+  description String?  // Descripción (ej: "Son las 10 de la mañana")
+  hourValue   Int?     // Hora que representa (0-23), null si es genérica
+  
+  // Configuración de reproducción
+  enabled     Boolean  @default(true)
+  
+  // Estado
+  status      String   @default("ready") // "processing" | "ready" | "error"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([hourValue])
+  @@map("time_announcements")
+}
+
+// Configuración de Locuciones por Cliente
+model AnnouncementConfig {
+  id                String   @id @default(cuid())
+  clientId          String   @unique
+  
+  // Configuración de frecuencia
+  enabled           Boolean  @default(false)
+  playEveryXSongs   Int      @default(5) // Reproducir cada X canciones
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relaciones
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("announcement_configs")
+}

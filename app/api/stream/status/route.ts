@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/stream/status - Obtener estado del stream
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
@@ -53,8 +53,47 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // TODO: Obtener estado real de Liquidsoap vía Telnet
-    // Por ahora retornamos estado basado en configuración
+    // Obtener información en tiempo real de Icecast
+    let currentSong = null;
+    let listeners = 0;
+    let peakListeners = 0;
+    let streamStatus = 'offline';
+
+    if (config.status === 'active') {
+      try {
+        // Construir URL de Icecast (usar localhost si es el servicio Docker)
+        const icecastHost = config.server.host === 'icecast' ? 'localhost' : config.server.host;
+        const icecastUrl = `http://${icecastHost}:${config.server.port}/status-json.xsl`;
+        
+        const response = await fetch(icecastUrl, {
+          headers: { 'Accept': 'application/json' },
+          cache: 'no-store',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Buscar el mountpoint del cliente
+          const sources = Array.isArray(data.icestats.source) 
+            ? data.icestats.source 
+            : [data.icestats.source];
+          
+          const clientSource = sources.find((source: any) => 
+            source && source.listenurl && source.listenurl.includes(config.mountpoint)
+          );
+
+          if (clientSource) {
+            currentSong = clientSource.title || clientSource.server_name || 'Sin información';
+            listeners = clientSource.listeners || 0;
+            peakListeners = clientSource.listener_peak || 0;
+            streamStatus = 'online';
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching Icecast status:', error);
+        // No lanzar error, solo continuar sin datos de Icecast
+      }
+    }
 
     return NextResponse.json({
       status: config.status,
@@ -79,6 +118,11 @@ export async function GET(req: NextRequest) {
         normalizeAudio: config.normalizeAudio,
         playbackMode: config.playbackMode,
       },
+      // Información en tiempo real
+      currentSong,
+      listeners,
+      peakListeners,
+      streamStatus,
     });
   } catch (error) {
     console.error("Error fetching stream status:", error);

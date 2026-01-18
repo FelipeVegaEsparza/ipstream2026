@@ -19,7 +19,8 @@ import {
   SpeakerWaveIcon,
   PlayIcon,
   MusicalNoteIcon,
-  SignalIcon
+  SignalIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -35,6 +36,7 @@ const navigation = [
       { name: 'Control', href: '/dashboard/streaming', icon: PlayIcon },
       { name: 'Biblioteca', href: '/dashboard/streaming/audio', icon: MusicalNoteIcon },
       { name: 'Playlists', href: '/dashboard/streaming/playlists', icon: SpeakerWaveIcon },
+      { name: 'Locuciones', href: '/dashboard/streaming/time-announcements', icon: ClockIcon },
       { name: 'Programación', href: '/dashboard/streaming/schedule', icon: MicrophoneIcon },
       { name: 'Estadísticas', href: '/dashboard/streaming/stats', icon: SignalIcon },
     ]

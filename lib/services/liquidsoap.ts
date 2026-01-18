@@ -159,84 +159,241 @@ export class LiquidsoapService {
       });
     }
 
+    // Obtener configuración de locuciones
+    const announcementConfig = await prisma.announcementConfig.findUnique({
+      where: { clientId },
+    });
+
+    // Obtener locuciones activas
+    let announcements = null;
+    if (announcementConfig?.enabled) {
+      announcements = await prisma.timeAnnouncement.findMany({
+        where: {
+          clientId,
+          enabled: true,
+          status: "ready",
+        },
+        orderBy: { createdAt: "asc" },
+      });
+    }
+
+    // Variables de entorno
+    const icecastHost = process.env.ICECAST_HOST || "icecast";
+    const icecastPort = process.env.ICECAST_PORT || "8000";
+    const icecastPassword = process.env.ICECAST_PASSWORD || "hackme";
+
+    // Convertir rutas de Windows a rutas de contenedor Docker
+    const convertPath = (storagePath: string): string => {
+      // Extraer solo el nombre del archivo (última parte de la ruta)
+      const fileName = storagePath.split(/[/\\]/).pop() || storagePath;
+      
+      // Construir ruta del contenedor: /audio/[clientId]/[filename]
+      return `/audio/${clientId}/${fileName}`;
+    };
+
     // Generar script
     const script = `#!/usr/bin/liquidsoap
 
-# Configuración de logs
-settings.log.level.set(3)
-settings.log.file.set(true)
-settings.log.file.path.set("/var/log/liquidsoap/liquidsoap.log")
+# Script generado automáticamente para: ${config.client.name}
+# Cliente ID: ${clientId}
+# Mountpoint: ${config.mountpoint}
 
-# Configuración del servidor
-settings.server.telnet.set(true)
-settings.server.telnet.bind_addr.set("0.0.0.0")
-settings.server.telnet.port.set(1234)
+# Variables de entorno
+icecast_host = environment.get("ICECAST_HOST", default="${icecastHost}")
+icecast_port = int_of_string(default=${icecastPort}, environment.get("ICECAST_PORT", default="${icecastPort}"))
+icecast_password = environment.get("ICECAST_PASSWORD", default="${icecastPassword}")
 
-# Playlist principal
-main_playlist = playlist(
+log("Iniciando stream para ${config.client.name} en ${config.mountpoint}")
+
+# Playlist principal - ${mainPlaylist.name}
+# Archivos:
+${mainPlaylist.items.map((item) => `# - ${convertPath(item.audioFile.storagePath)}`).join("\n")}
+main_playlist_${clientId.replace(/-/g, "_")} = playlist(
   mode="${config.playbackMode === "random" ? "randomize" : "normal"}",
   reload_mode="watch",
-  [
-${mainPlaylist.items.map((item) => `    "${item.audioFile.storagePath}",`).join("\n")}
-  ]
+  "/audio/${clientId}/playlist.m3u"
 )
+
+${
+  announcementConfig?.enabled && announcements && announcements.length > 0
+    ? `
+# Locuciones de hora
+# Archivos:
+${announcements.map((ann) => `# - ${convertPath(ann.storagePath)}`).join("\n")}
+announcements_playlist_${clientId.replace(/-/g, "_")} = playlist(
+  mode="randomize",
+  reload_mode="watch",
+  "/audio/${clientId}/announcements.m3u"
+)
+`
+    : ""
+}
 
 ${
   config.jinglesEnabled && jinglesPlaylist && jinglesPlaylist.items.length > 0
     ? `
 # Playlist de jingles
-jingles_playlist = playlist(
+jingles_playlist_${clientId.replace(/-/g, "_")} = playlist(
   mode="randomize",
   reload_mode="watch",
-  [
-${jinglesPlaylist.items.map((item) => `    "${item.audioFile.storagePath}",`).join("\n")}
-  ]
+  "/audio/${clientId}/jingles.m3u"
+)
+`
+    : ""
+}
+
+${
+  // Combinar fuentes según configuración
+  (() => {
+    const hasAnnouncements = announcementConfig?.enabled && announcements && announcements.length > 0;
+    const hasJingles = config.jinglesEnabled && jinglesPlaylist && jinglesPlaylist.items.length > 0;
+
+    if (hasAnnouncements && hasJingles) {
+      // Ambos activos: locuciones cada X canciones, jingles cada Y canciones
+      return `
+# Insertar locuciones cada ${announcementConfig.playEveryXSongs} canciones
+radio_with_announcements_${clientId.replace(/-/g, "_")} = rotate(
+  weights=[${announcementConfig.playEveryXSongs}, 1],
+  [main_playlist_${clientId.replace(/-/g, "_")}, announcements_playlist_${clientId.replace(/-/g, "_")}]
 )
 
 # Insertar jingles cada ${config.jinglesFrequency} canciones
-radio = rotate(
+radio_${clientId.replace(/-/g, "_")} = rotate(
   weights=[${config.jinglesFrequency}, 1],
-  [main_playlist, jingles_playlist]
+  [radio_with_announcements_${clientId.replace(/-/g, "_")}, jingles_playlist_${clientId.replace(/-/g, "_")}]
 )
-`
-    : `
-# Radio sin jingles
-radio = main_playlist
-`
+`;
+    } else if (hasAnnouncements) {
+      // Solo locuciones
+      return `
+# Insertar locuciones cada ${announcementConfig.playEveryXSongs} canciones
+radio_${clientId.replace(/-/g, "_")} = rotate(
+  weights=[${announcementConfig.playEveryXSongs}, 1],
+  [main_playlist_${clientId.replace(/-/g, "_")}, announcements_playlist_${clientId.replace(/-/g, "_")}]
+)
+`;
+    } else if (hasJingles) {
+      // Solo jingles
+      return `
+# Insertar jingles cada ${config.jinglesFrequency} canciones
+radio_${clientId.replace(/-/g, "_")} = rotate(
+  weights=[${config.jinglesFrequency}, 1],
+  [main_playlist_${clientId.replace(/-/g, "_")}, jingles_playlist_${clientId.replace(/-/g, "_")}]
+)
+`;
+    } else {
+      // Sin locuciones ni jingles
+      return `
+# Radio sin locuciones ni jingles
+radio_${clientId.replace(/-/g, "_")} = main_playlist_${clientId.replace(/-/g, "_")}
+`;
+    }
+  })()
 }
 
 # Aplicar crossfade
-radio = crossfade(
-  duration=${config.crossfadeDuration},
-  radio
+radio_${clientId.replace(/-/g, "_")} = crossfade(
+  duration=${config.crossfadeDuration.toFixed(1)},
+  radio_${clientId.replace(/-/g, "_")}
 )
 
-# Normalizar audio si está habilitado
-radio = if ${config.normalizeAudio} then
-  amplify(${config.normalizationLevel}, radio)
-else
-  radio
-end
+# Normalizar audio (usar normalize para normalización automática)
+radio_${clientId.replace(/-/g, "_")} = ${
+  config.normalizeAudio 
+    ? `normalize(target=-16.0, window=0.1, radio_${clientId.replace(/-/g, "_")})` 
+    : `radio_${clientId.replace(/-/g, "_")}`
+}
 
-# Output a Icecast
+# Hacer la fuente infallible (fallback a silencio si falla)
+radio_${clientId.replace(/-/g, "_")} = mksafe(radio_${clientId.replace(/-/g, "_")})
+
+# Output a Icecast con metadata actualizada
 output.icecast(
   %mp3(bitrate=128),
-  host="${config.server.host}",
-  port=${config.server.port},
-  password="${config.liveInputPassword}",
+  host=icecast_host,
+  port=icecast_port,
+  password=icecast_password,
   mount="${config.mountpoint}",
   name="${config.client.name}",
   description="Radio ${config.client.name}",
   genre="Various",
-  url="http://${config.server.host}:${config.server.port}${config.mountpoint}",
-  radio
+  url="http://#{icecast_host}:#{icecast_port}${config.mountpoint}",
+  public=false,
+  radio_${clientId.replace(/-/g, "_")}
 )
 
-# Log
-log("Radio ${config.client.name} started on ${config.mountpoint}")
+log("Stream ${config.client.name} activo en ${config.mountpoint}")
 `;
 
     return script;
+  }
+
+  /**
+   * Genera archivo M3U para una playlist
+   */
+  static async generateM3U(clientId: string, playlistType: "main" | "jingles" = "main"): Promise<string> {
+    const playlist = await prisma.playlist.findFirst({
+      where: {
+        clientId,
+        ...(playlistType === "main" ? { isMain: true } : { type: "jingles" }),
+      },
+      include: {
+        items: {
+          include: {
+            audioFile: true,
+          },
+          orderBy: { order: "asc" },
+        },
+      },
+    });
+
+    if (!playlist || playlist.items.length === 0) {
+      throw new Error(`No hay playlist de tipo ${playlistType} o está vacía`);
+    }
+
+    // Convertir rutas
+    const convertPath = (storagePath: string): string => {
+      const fileName = storagePath.split(/[/\\]/).pop() || storagePath;
+      return `/audio/${clientId}/${fileName}`;
+    };
+
+    // Generar contenido M3U
+    const m3uContent = playlist.items
+      .map((item) => convertPath(item.audioFile.storagePath))
+      .join("\n");
+
+    return m3uContent;
+  }
+
+  /**
+   * Genera archivo M3U para locuciones de hora
+   */
+  static async generateAnnouncementsM3U(clientId: string): Promise<string> {
+    const announcements = await prisma.timeAnnouncement.findMany({
+      where: {
+        clientId,
+        enabled: true,
+        status: "ready",
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    if (announcements.length === 0) {
+      throw new Error("No hay locuciones activas");
+    }
+
+    // Convertir rutas
+    const convertPath = (storagePath: string): string => {
+      const fileName = storagePath.split(/[/\\]/).pop() || storagePath;
+      return `/audio/${clientId}/announcements/${fileName}`;
+    };
+
+    // Generar contenido M3U
+    const m3uContent = announcements
+      .map((ann) => convertPath(ann.storagePath))
+      .join("\n");
+
+    return m3uContent;
   }
 
   /**

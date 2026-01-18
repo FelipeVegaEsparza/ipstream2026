@@ -13,12 +13,14 @@ import {
   CreditCardIcon,
   Cog6ToothIcon,
   DocumentTextIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  ServerIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
   { name: 'Dashboard Admin', href: '/admin', icon: HomeIcon },
   { name: 'Gestión de Usuarios', href: '/admin/users', icon: UserGroupIcon },
+  { name: 'Servidores de Streaming', href: '/admin/stream-servers', icon: ServerIcon },
   { name: 'Estadísticas Globales', href: '/admin/stats', icon: ChartBarIcon },
   { name: 'Planes y Pagos', href: '/admin/billing', icon: CreditCardIcon },
   { name: 'Impersonar Cliente', href: '/admin/impersonate', icon: ArrowPathRoundedSquareIcon },

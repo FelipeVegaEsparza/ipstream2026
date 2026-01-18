@@ -200,18 +200,18 @@ export function ScheduleManager({ schedules: initialSchedules, playlists }: Sche
 
       {/* Modal Crear Programación */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card max-w-md w-full">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-8 max-w-md w-full">
             <h2 className="text-2xl font-bold text-white mb-6">Nueva Programación</h2>
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleCreate} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-100 mb-2">
                   Playlist *
                 </label>
                 <select
                   value={newSchedule.playlistId}
                   onChange={(e) => setNewSchedule({ ...newSchedule, playlistId: e.target.value })}
-                  className="input-field"
+                  className="w-full rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 px-4 py-3"
                   required
                 >
                   <option value="">Selecciona una playlist</option>
@@ -224,13 +224,13 @@ export function ScheduleManager({ schedules: initialSchedules, playlists }: Sche
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-100 mb-2">
                   Día de la Semana *
                 </label>
                 <select
                   value={newSchedule.dayOfWeek}
                   onChange={(e) => setNewSchedule({ ...newSchedule, dayOfWeek: parseInt(e.target.value) })}
-                  className="input-field"
+                  className="w-full rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 px-4 py-3"
                 >
                   {DAYS.map((day, index) => (
                     <option key={index} value={index}>
@@ -242,26 +242,26 @@ export function ScheduleManager({ schedules: initialSchedules, playlists }: Sche
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-100 mb-2">
                     Hora Inicio *
                   </label>
                   <input
                     type="time"
                     value={newSchedule.startTime}
                     onChange={(e) => setNewSchedule({ ...newSchedule, startTime: e.target.value })}
-                    className="input-field"
+                    className="w-full rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 px-4 py-3"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-semibold text-gray-100 mb-2">
                     Hora Fin *
                   </label>
                   <input
                     type="time"
                     value={newSchedule.endTime}
                     onChange={(e) => setNewSchedule({ ...newSchedule, endTime: e.target.value })}
-                    className="input-field"
+                    className="w-full rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 px-4 py-3"
                     required
                   />
                 </div>
@@ -275,7 +275,7 @@ export function ScheduleManager({ schedules: initialSchedules, playlists }: Sche
                   onChange={(e) => setNewSchedule({ ...newSchedule, isActive: e.target.checked })}
                   className="w-4 h-4 text-cyan-500 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
                 />
-                <label htmlFor="isActive" className="text-sm text-gray-300">
+                <label htmlFor="isActive" className="text-sm font-medium text-gray-100">
                   Activar programación
                 </label>
               </div>

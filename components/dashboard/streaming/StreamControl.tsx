@@ -1,21 +1,75 @@
 'use client'
 
-import { useState } from 'react'
-import { PlayIcon, PauseIcon, ForwardIcon, Cog6ToothIcon, SignalIcon } from '@heroicons/react/24/solid'
+import { useState, useEffect } from 'react'
+import { PlayIcon, PauseIcon, ForwardIcon, Cog6ToothIcon, SignalIcon, MusicalNoteIcon } from '@heroicons/react/24/solid'
 
 interface StreamControlProps {
   config: any
   mainPlaylist: any
-  latestStat: any
+  initialStatus: any
 }
 
-export function StreamControl({ config, mainPlaylist, latestStat }: StreamControlProps) {
+export function StreamControl({ config, mainPlaylist, initialStatus }: StreamControlProps) {
   const [isStarting, setIsStarting] = useState(false)
   const [isStopping, setIsStopping] = useState(false)
   const [isSkipping, setIsSkipping] = useState(false)
+  const [streamStatus, setStreamStatus] = useState(initialStatus)
 
   const isActive = config.status === 'active'
-  const streamUrl = `http://${config.server.host}:${config.server.port}${config.mountpoint}`
+  
+  // Actualizar streamStatus cuando cambia initialStatus
+  useEffect(() => {
+    setStreamStatus(initialStatus)
+  }, [initialStatus])
+  
+  // Auto-refresh del estado cada 5 segundos cuando el stream está activo
+  useEffect(() => {
+    if (!isActive) return
+
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch('/api/stream/status', { cache: 'no-store' })
+        if (res.ok) {
+          const data = await res.json()
+          setStreamStatus({
+            currentSong: data.currentSong,
+            listeners: data.listeners,
+            peakListeners: data.peakListeners,
+            streamStatus: data.streamStatus,
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching stream status:', error)
+      }
+    }
+
+    // Fetch inmediato al montar
+    fetchStatus()
+
+    // Luego cada 5 segundos
+    const interval = setInterval(fetchStatus, 5000)
+
+    return () => clearInterval(interval)
+  }, [isActive])
+  
+  // Generar URL correcta del stream
+  const getStreamUrl = () => {
+    let host = config.server.host
+    
+    if (host === 'icecast' || host === 'liquidsoap') {
+      host = 'localhost'
+    }
+    
+    if (typeof window !== 'undefined' && (host === 'localhost' || host === '127.0.0.1')) {
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        host = window.location.hostname
+      }
+    }
+    
+    return `http://${host}:${config.server.port}${config.mountpoint}`
+  }
+  
+  const streamUrl = getStreamUrl()
 
   const handleStart = async () => {
     setIsStarting(true)
@@ -87,15 +141,15 @@ export function StreamControl({ config, mainPlaylist, latestStat }: StreamContro
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="glass-effect rounded-lg p-4">
             <p className="text-sm text-gray-400 mb-1">Oyentes Actuales</p>
-            <p className="text-3xl font-bold text-white">{latestStat?.listeners || 0}</p>
+            <p className="text-3xl font-bold text-white">{streamStatus?.listeners || 0}</p>
           </div>
           <div className="glass-effect rounded-lg p-4">
             <p className="text-sm text-gray-400 mb-1">Pico del Día</p>
-            <p className="text-3xl font-bold text-white">{latestStat?.peakListeners || 0}</p>
+            <p className="text-3xl font-bold text-white">{streamStatus?.peakListeners || 0}</p>
           </div>
           <div className="glass-effect rounded-lg p-4">
             <p className="text-sm text-gray-400 mb-1">Estado</p>
-            <p className="text-lg font-semibold text-white">{latestStat?.streamStatus || 'offline'}</p>
+            <p className="text-lg font-semibold text-white">{streamStatus?.streamStatus || 'offline'}</p>
           </div>
         </div>
 
@@ -152,20 +206,23 @@ export function StreamControl({ config, mainPlaylist, latestStat }: StreamContro
       </div>
 
       {/* Reproduciendo Ahora */}
-      {isActive && latestStat?.currentSong && (
+      {isActive && streamStatus?.currentSong && (
         <div className="card">
-          <h2 className="text-xl font-semibold text-white mb-4">Reproduciendo Ahora</h2>
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+            <MusicalNoteIcon className="w-6 h-6 text-cyan-400 mr-2" />
+            Reproduciendo Ahora
+          </h2>
           <div className="glass-effect rounded-lg p-6">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center animate-pulse">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-lg font-semibold text-white">{latestStat.currentSong}</p>
+                <p className="text-lg font-semibold text-white mb-1">{streamStatus.currentSong}</p>
                 <p className="text-sm text-gray-400">
-                  {new Date(latestStat.timestamp).toLocaleTimeString()}
+                  🎵 En vivo • {streamStatus.listeners} oyente{streamStatus.listeners !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
@@ -177,11 +234,30 @@ export function StreamControl({ config, mainPlaylist, latestStat }: StreamContro
       <div className="card">
         <h2 className="text-xl font-semibold text-white mb-4">Información del Stream</h2>
         <div className="space-y-3">
-          <div className="flex justify-between items-center p-3 glass-effect rounded-lg">
-            <span className="text-sm text-gray-300">URL del Stream</span>
-            <code className="text-sm text-cyan-400 bg-gray-800/50 px-3 py-1 rounded">
+          <div className="p-3 glass-effect rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-300">URL del Stream</span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(streamUrl)
+                  alert('URL copiada al portapapeles')
+                }}
+                className="text-xs text-cyan-400 hover:text-cyan-300 px-2 py-1 rounded hover:bg-cyan-500/10"
+              >
+                Copiar
+              </button>
+            </div>
+            <a
+              href={streamUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-cyan-400 hover:text-cyan-300 bg-gray-800/50 px-3 py-2 rounded block break-all"
+            >
               {streamUrl}
-            </code>
+            </a>
+            <p className="text-xs text-gray-500 mt-2">
+              Usa esta URL en VLC, Winamp o cualquier reproductor de streaming
+            </p>
           </div>
           <div className="flex justify-between items-center p-3 glass-effect rounded-lg">
             <span className="text-sm text-gray-300">Servidor</span>

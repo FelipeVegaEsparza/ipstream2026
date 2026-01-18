@@ -1,6 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-// This route is used by the health checker to verify that the application is running.
 export async function GET() {
-  return NextResponse.json({ status: 'ok' }, { status: 200 });
+  try {
+    // Verificar conexión a base de datos
+    await prisma.$queryRaw`SELECT 1`;
+    
+    return NextResponse.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      services: {
+        database: "connected",
+        app: "running",
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        status: "unhealthy",
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 503 }
+    );
+  }
 }

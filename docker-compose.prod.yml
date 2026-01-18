@@ -1,0 +1,167 @@
+version: '3.8'
+
+services:
+  # Aplicación Next.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      args:
+        - NODE_ENV=production
+    container_name: ipstream_app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - ICECAST_HOST=icecast
+      - ICECAST_PORT=8000
+      - ICECAST_PASSWORD=${ICECAST_PASSWORD}
+    volumes:
+      - ./public/audio:/app/public/audio
+      - ./docker/liquidsoap/scripts/clients:/app/docker/liquidsoap/scripts/clients
+    networks:
+      - ipstream_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      # Traefik labels para Dokploy
+      - "traefik.enable=true"
+      - "traefik.http.routers.ipstream-app.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.ipstream-app.entrypoints=websecure"
+      - "traefik.http.routers.ipstream-app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ipstream-app.loadbalancer.server.port=3000"
+      # Redirect HTTP to HTTPS
+      - "traefik.http.routers.ipstream-app-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.ipstream-app-http.entrypoints=web"
+      - "traefik.http.routers.ipstream-app-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: ipstream_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - ipstream_network
+    command: --default-authentication-plugin=mysql_native_password --max_connections=500
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+  # Servidor de Streaming Icecast
+  icecast:
+    image: moul/icecast
+    container_name: ipstream_icecast
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./docker/icecast/icecast.xml:/etc/icecast2/icecast.xml
+      - icecast_logs:/var/log/icecast2
+    networks:
+      - ipstream_network
+    environment:
+      - ICECAST_SOURCE_PASSWORD=${ICECAST_PASSWORD}
+      - ICECAST_RELAY_PASSWORD=${ICECAST_PASSWORD}
+      - ICECAST_ADMIN_PASSWORD=${ICECAST_ADMIN_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status.xsl"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      # Traefik labels para streaming
+      - "traefik.enable=true"
+      - "traefik.http.routers.ipstream-icecast.rule=Host(`${STREAM_DOMAIN}`)"
+      - "traefik.http.routers.ipstream-icecast.entrypoints=websecure"
+      - "traefik.http.routers.ipstream-icecast.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ipstream-icecast.loadbalancer.server.port=8000"
+      # Redirect HTTP to HTTPS
+      - "traefik.http.routers.ipstream-icecast-http.rule=Host(`${STREAM_DOMAIN}`)"
+      - "traefik.http.routers.ipstream-icecast-http.entrypoints=web"
+      - "traefik.http.routers.ipstream-icecast-http.middlewares=redirect-to-https"
+
+  # Motor de AutoDJ Liquidsoap
+  liquidsoap:
+    build:
+      context: ./docker/liquidsoap
+      dockerfile: Dockerfile
+    container_name: ipstream_liquidsoap
+    restart: unless-stopped
+    volumes:
+      - ./docker/liquidsoap/scripts:/scripts
+      - ./docker/liquidsoap/scripts/clients:/scripts/clients
+      - ./public/audio:/audio
+      - liquidsoap_logs:/var/log/liquidsoap
+    networks:
+      - ipstream_network
+    depends_on:
+      icecast:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      - ICECAST_HOST=icecast
+      - ICECAST_PORT=8000
+      - ICECAST_PASSWORD=${ICECAST_PASSWORD}
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+
+  # Redis para caché y colas
+  redis:
+    image: redis:7-alpine
+    container_name: ipstream_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ipstream_network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
+  icecast_logs:
+    driver: local
+  liquidsoap_logs:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ipstream_network:
+    driver: bridge

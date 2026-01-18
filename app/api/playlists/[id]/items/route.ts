@@ -4,12 +4,12 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-// Schema de validación
-const addItemSchema = z.object({
-  audioFileId: z.string(),
+// Schema de validación - ahora acepta array de IDs
+const addItemsSchema = z.object({
+  audioFileIds: z.array(z.string()).min(1, "Debe proporcionar al menos un archivo"),
 });
 
-// POST /api/playlists/[id]/items - Agregar canción a playlist
+// POST /api/playlists/[id]/items - Agregar canciones a playlist
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -52,51 +52,73 @@ export async function POST(
 
     // Validar datos
     const body = await req.json();
-    const { audioFileId } = addItemSchema.parse(body);
+    const { audioFileIds } = addItemsSchema.parse(body);
 
-    // Verificar que el archivo pertenece al cliente
-    const audioFile = await prisma.audioFile.findFirst({
+    // Verificar que todos los archivos pertenecen al cliente
+    const audioFiles = await prisma.audioFile.findMany({
       where: {
-        id: audioFileId,
+        id: { in: audioFileIds },
         clientId,
       },
     });
 
-    if (!audioFile) {
-      return NextResponse.json({ error: "Archivo de audio no encontrado" }, { status: 404 });
+    if (audioFiles.length !== audioFileIds.length) {
+      return NextResponse.json(
+        { error: "Algunos archivos de audio no fueron encontrados" },
+        { status: 404 }
+      );
     }
 
-    // Verificar que no esté duplicado
-    const existing = await prisma.playlistItem.findFirst({
+    // Verificar duplicados
+    const existingItems = await prisma.playlistItem.findMany({
       where: {
         playlistId: params.id,
-        audioFileId,
+        audioFileId: { in: audioFileIds },
       },
     });
 
-    if (existing) {
+    if (existingItems.length > 0) {
+      const duplicateIds = existingItems.map(item => item.audioFileId);
+      const duplicateFiles = audioFiles.filter(f => duplicateIds.includes(f.id));
       return NextResponse.json(
-        { error: "La canción ya está en la playlist" },
+        { 
+          error: `${duplicateFiles.length} canción(es) ya están en la playlist`,
+          duplicates: duplicateFiles.map(f => f.title || f.filename)
+        },
         { status: 400 }
       );
     }
 
     // Calcular siguiente orden
-    const nextOrder = playlist.items.length > 0 ? playlist.items[0].order + 1 : 0;
+    let nextOrder = playlist.items.length > 0 ? playlist.items[0].order + 1 : 0;
 
-    // Crear item
-    const item = await prisma.playlistItem.create({
-      data: {
+    // Crear items en batch
+    const itemsToCreate = audioFileIds.map((audioFileId, index) => ({
+      playlistId: params.id,
+      audioFileId,
+      order: nextOrder + index,
+    }));
+
+    await prisma.playlistItem.createMany({
+      data: itemsToCreate,
+    });
+
+    // Obtener items creados con sus archivos
+    const createdItems = await prisma.playlistItem.findMany({
+      where: {
         playlistId: params.id,
-        audioFileId,
-        order: nextOrder,
+        audioFileId: { in: audioFileIds },
       },
       include: {
         audioFile: true,
       },
     });
 
-    return NextResponse.json({ item });
+    return NextResponse.json({ 
+      items: createdItems,
+      count: createdItems.length,
+      message: `${createdItems.length} canción(es) agregada(s) exitosamente`
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -104,9 +126,9 @@ export async function POST(
         { status: 400 }
       );
     }
-    console.error("Error adding item to playlist:", error);
+    console.error("Error adding items to playlist:", error);
     return NextResponse.json(
-      { error: "Error al agregar canción" },
+      { error: "Error al agregar canciones" },
       { status: 500 }
     );
   }

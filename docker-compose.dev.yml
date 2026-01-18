@@ -53,7 +53,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./docker/liquidsoap/scripts:/scripts
-      - audio_storage:/audio
+      - ./docker/liquidsoap/scripts/clients:/scripts/clients
+      - ./public/audio:/audio
       - liquidsoap_logs:/var/log/liquidsoap
     networks:
       - ipstream_network

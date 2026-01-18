@@ -140,8 +140,78 @@ npm run dev
 - **Ranking de Videos**: Lista ordenada de videos con reordenamiento
 - **Auspiciadores**: Gestión completa de sponsors con logos y redes sociales
 - **Promociones**: Creación y gestión de promociones con imágenes y enlaces
+- **Podcasts**: Gestión de episodios de audio y video
 - **Upload de Imágenes**: Sistema completo de subida de imágenes al servidor
 - **API de Prueba**: Página integrada para probar todos los endpoints
+
+### 🎵 Sistema de Streaming (NUEVO)
+- **AutoDJ**: Reproducción automática con playlists y crossfade
+- **Biblioteca de Audio**: Gestión completa de archivos MP3/AAC/OGG
+- **Playlists**: Creación y gestión de listas de reproducción
+- **Programación Horaria**: Configuración de horarios automáticos
+- **Transmisión en Vivo**: Soporte para live input desde software externo
+- **Estadísticas**: Métricas en tiempo real de oyentes
+- **Múltiples Calidades**: 64, 128, 320 kbps
+- **Jingles**: Sistema de inserción automática de jingles
+
+### Para Administradores
+- **Gestión de Usuarios**: CRUD completo de usuarios y clientes
+- **Servidores de Streaming**: Gestión de VPS con Icecast + Liquidsoap
+- **Asignación Automática**: Sistema inteligente de balanceo de carga
+- **Impersonación**: Acceso temporal a cuentas de clientes
+- **Estadísticas Globales**: Métricas del sistema completo
+- **Planes y Pagos**: Gestión de suscripciones
+
+## 🚀 Inicio Rápido - Sistema de Streaming
+
+### Configuración Inicial (Solo Administradores)
+
+**¿Ves el mensaje "Configuración de Streaming Pendiente"?**
+
+Sigue estos pasos para activar el streaming:
+
+1. **Inicializa el sistema de streaming**
+   ```bash
+   npm run streaming:init
+   ```
+   Este comando crea automáticamente un servidor de desarrollo.
+
+2. **Accede a la gestión de servidores**
+   ```
+   http://localhost:3000/admin/stream-servers
+   ```
+
+3. **Asigna el servidor a un cliente**
+   - Haz clic en "Asignar Cliente"
+   - Selecciona el cliente
+   - El sistema asignará automáticamente el mejor servidor
+
+4. **¡Listo!**
+   - Recarga `/dashboard/streaming`
+   - Todas las funciones estarán disponibles
+
+**📖 Guía completa**: Ver [GUIA-INICIO-STREAMING.md](./GUIA-INICIO-STREAMING.md)
+
+### Entorno de Desarrollo con Docker
+
+Para desarrollo local con todos los servicios de streaming:
+
+```bash
+# Levantar todos los servicios (MySQL, Icecast, Liquidsoap, Redis)
+docker-compose -f docker-compose.dev.yml up -d
+
+# Verificar que todo está corriendo
+docker-compose -f docker-compose.dev.yml ps
+
+# Ver logs de Liquidsoap
+docker-compose -f docker-compose.dev.yml logs -f liquidsoap
+
+# Acceder a Icecast
+# URL: http://localhost:8000
+# Usuario: admin / Contraseña: hackme
+```
+
+**📖 Documentación completa**: Ver [README-STREAMING-DEV.md](./README-STREAMING-DEV.md)
 
 ### API REST Pública
 
@@ -258,15 +328,16 @@ const programsData = await programs.json()
 ## Scripts Disponibles
 
 ```bash
-npm run dev          # Desarrollo
-npm run build        # Build de producción
-npm run start        # Ejecutar en producción
-npm run lint         # Linter
-npm run db:push      # Push del schema a la DB
-npm run db:migrate   # Ejecutar migraciones
-npm run db:generate  # Generar cliente Prisma
-npm run db:studio    # Abrir Prisma Studio
-npm run db:seed      # Crear usuario administrador
+npm run dev             # Desarrollo
+npm run build           # Build de producción
+npm run start           # Ejecutar en producción
+npm run lint            # Linter
+npm run db:push         # Push del schema a la DB
+npm run db:migrate      # Ejecutar migraciones
+npm run db:generate     # Generar cliente Prisma
+npm run db:studio       # Abrir Prisma Studio
+npm run db:seed         # Crear usuario administrador
+npm run streaming:init  # Inicializar sistema de streaming
 ```
 
 ## Deployment

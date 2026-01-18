@@ -190,32 +190,32 @@ export function PlaylistsManager({ playlists: initialPlaylists }: PlaylistsManag
 
       {/* Modal Crear Playlist */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="card max-w-md w-full">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-8 max-w-md w-full">
             <h2 className="text-2xl font-bold text-white mb-6">Nueva Playlist</h2>
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleCreate} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-100 mb-2">
                   Nombre *
                 </label>
                 <input
                   type="text"
                   value={newPlaylist.name}
                   onChange={(e) => setNewPlaylist({ ...newPlaylist, name: e.target.value })}
-                  className="input-field"
+                  className="w-full rounded-xl bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 px-4 py-3"
                   required
                   placeholder="Mi Playlist"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-100 mb-2">
                   Tipo
                 </label>
                 <select
                   value={newPlaylist.type}
                   onChange={(e) => setNewPlaylist({ ...newPlaylist, type: e.target.value })}
-                  className="input-field"
+                  className="w-full rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 px-4 py-3"
                 >
                   <option value="rotation">Rotación</option>
                   <option value="special">Especial</option>
@@ -224,13 +224,13 @@ export function PlaylistsManager({ playlists: initialPlaylists }: PlaylistsManag
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-100 mb-2">
                   Descripción
                 </label>
                 <textarea
                   value={newPlaylist.description}
                   onChange={(e) => setNewPlaylist({ ...newPlaylist, description: e.target.value })}
-                  className="input-field"
+                  className="w-full rounded-xl bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 px-4 py-3"
                   rows={3}
                   placeholder="Descripción opcional"
                 />
@@ -244,7 +244,7 @@ export function PlaylistsManager({ playlists: initialPlaylists }: PlaylistsManag
                   onChange={(e) => setNewPlaylist({ ...newPlaylist, isMain: e.target.checked })}
                   className="w-4 h-4 text-cyan-500 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
                 />
-                <label htmlFor="isMain" className="text-sm text-gray-300">
+                <label htmlFor="isMain" className="text-sm font-medium text-gray-100">
                   Marcar como playlist principal
                 </label>
               </div>

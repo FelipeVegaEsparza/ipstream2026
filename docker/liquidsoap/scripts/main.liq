@@ -1,7 +1,7 @@
 #!/usr/bin/liquidsoap
 
-# Configuración básica de Liquidsoap para IPStream Panel
-# Este es un script de prueba inicial
+# Configuración principal de Liquidsoap para IPStream Panel
+# Este script carga dinámicamente los streams de cada cliente
 
 # Configuración de logs
 settings.log.file.set(true)
@@ -22,36 +22,28 @@ icecast_password = environment.get("ICECAST_PASSWORD", default="hackme")
 log("IPStream Liquidsoap iniciando...")
 log("Icecast host: #{icecast_host}:#{icecast_port}")
 
-# Fuente de prueba: playlist de archivos de audio
-# Por ahora usamos una playlist simple de archivos locales
-# En producción, esto leerá de la base de datos
-
-# Playlist de prueba (vacía por ahora, se llenará desde el panel)
+# Stream de prueba (mantener para testing)
 playlist_source = playlist(
   mode="randomize",
   reload_mode="watch",
   "/audio/playlist.m3u"
 )
 
-# Aplicar crossfade (transición suave entre canciones)
 playlist_with_crossfade = crossfade(
   duration=3.0,
   playlist_source
 )
 
-# Normalizar volumen
 normalized = amplify(
   1.0,
   playlist_with_crossfade
 )
 
-# Fallback: si no hay playlist, reproducir silencio
 safe_source = fallback(
   track_sensitive=false,
   [normalized, blank()]
 )
 
-# Output a Icecast - Mountpoint de prueba
 output.icecast(
   %mp3(bitrate=128),
   host=icecast_host,
@@ -66,4 +58,13 @@ output.icecast(
 )
 
 log("Liquidsoap configurado y listo")
-log("Stream disponible en: http://#{icecast_host}:#{icecast_port}/test")
+log("Stream de prueba disponible en: http://#{icecast_host}:#{icecast_port}/test")
+
+# Cargar scripts de clientes
+# Los scripts se incluyen directamente aquí
+# Cuando se crea/elimina un script, Liquidsoap se reinicia automáticamente
+
+# Incluir scripts de clientes
+%include "/scripts/clients/cmk7r1pzh0003josww1yjse2w.liq"
+
+log("Todos los scripts cargados")

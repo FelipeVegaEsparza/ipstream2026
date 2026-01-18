@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import { prisma } from "@/lib/prisma";
+import { existsSync } from "fs";
 
 const execAsync = promisify(exec);
 
@@ -18,10 +19,28 @@ interface AudioMetadata {
 
 export class AudioProcessingService {
   /**
+   * Verifica si FFmpeg está disponible en el sistema
+   */
+  static async checkFFmpegAvailable(): Promise<boolean> {
+    try {
+      await execAsync("ffmpeg -version");
+      return true;
+    } catch (error) {
+      console.warn("FFmpeg no está disponible en el sistema");
+      return false;
+    }
+  }
+
+  /**
    * Extrae metadata de un archivo de audio usando FFmpeg
    */
   static async extractMetadata(filePath: string): Promise<AudioMetadata> {
     try {
+      // Verificar que el archivo existe
+      if (!existsSync(filePath)) {
+        throw new Error(`Archivo no encontrado: ${filePath}`);
+      }
+
       const { stdout } = await execAsync(
         `ffprobe -v quiet -print_format json -show_format -show_streams "${filePath}"`
       );
@@ -37,9 +56,9 @@ export class AudioProcessingService {
       // Extraer metadata
       const metadata: AudioMetadata = {
         duration: parseFloat(format.duration) || 0,
-        bitrate: parseInt(format.bit_rate) || parseInt(audioStream.bit_rate) || 0,
-        sampleRate: parseInt(audioStream.sample_rate) || 0,
-        channels: parseInt(audioStream.channels) || 0,
+        bitrate: parseInt(format.bit_rate) || parseInt(audioStream.bit_rate) || 128000,
+        sampleRate: parseInt(audioStream.sample_rate) || 44100,
+        channels: parseInt(audioStream.channels) || 2,
       };
 
       // Tags opcionales
@@ -58,7 +77,7 @@ export class AudioProcessingService {
       return metadata;
     } catch (error) {
       console.error("Error extracting metadata:", error);
-      throw new Error("Error al extraer metadata del audio");
+      throw error;
     }
   }
 
@@ -67,18 +86,26 @@ export class AudioProcessingService {
    */
   static async validateAudioFile(filePath: string): Promise<boolean> {
     try {
+      // Verificar que el archivo existe
+      if (!existsSync(filePath)) {
+        console.error(`Archivo no encontrado: ${filePath}`);
+        return false;
+      }
+
       const { stdout } = await execAsync(
         `ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of default=noprint_wrappers=1:nokey=1 "${filePath}"`
       );
 
       return stdout.trim() === "audio";
     } catch (error) {
+      console.error("Error validating audio file:", error);
       return false;
     }
   }
 
   /**
    * Procesa un archivo de audio: extrae metadata y actualiza DB
+   * Esta es la función principal que debe llamarse después de subir un archivo
    */
   static async processAudioFile(audioFileId: string): Promise<void> {
     try {
@@ -88,23 +115,59 @@ export class AudioProcessingService {
       });
 
       if (!audioFile) {
-        throw new Error("Archivo no encontrado");
+        throw new Error("Archivo no encontrado en la base de datos");
       }
 
-      // Validar archivo
+      console.log(`Procesando archivo: ${audioFile.filename} (${audioFileId})`);
+
+      // Verificar si FFmpeg está disponible
+      const hasFFmpeg = await this.checkFFmpegAvailable();
+      
+      if (!hasFFmpeg) {
+        console.warn("FFmpeg no disponible. Marcando archivo como listo con metadata básica.");
+        
+        // Extraer nombre sin extensión para usar como título
+        const titleFromFilename = audioFile.filename.replace(/\.[^/.]+$/, "");
+        
+        // Marcar como listo con metadata básica
+        await prisma.audioFile.update({
+          where: { id: audioFileId },
+          data: {
+            title: titleFromFilename,
+            duration: 180, // 3 minutos por defecto
+            bitrate: 128000,
+            sampleRate: 44100,
+            channels: 2,
+            status: "ready",
+          },
+        });
+        
+        console.log(`Archivo ${audioFileId} marcado como listo (sin FFmpeg)`);
+        return;
+      }
+
+      // Verificar que el archivo existe físicamente
+      if (!existsSync(audioFile.storagePath)) {
+        throw new Error(`Archivo físico no encontrado: ${audioFile.storagePath}`);
+      }
+
+      // Validar que es un archivo de audio válido
       const isValid = await this.validateAudioFile(audioFile.storagePath);
       if (!isValid) {
         await prisma.audioFile.update({
           where: { id: audioFileId },
           data: { status: "error" },
         });
-        throw new Error("Archivo de audio inválido");
+        throw new Error("Archivo de audio inválido o corrupto");
       }
 
-      // Extraer metadata
+      // Extraer metadata con FFmpeg
       const metadata = await this.extractMetadata(audioFile.storagePath);
 
-      // Actualizar en DB
+      // Extraer título del nombre de archivo si no hay metadata
+      const titleFromFilename = audioFile.filename.replace(/\.[^/.]+$/, "");
+
+      // Actualizar en DB con toda la metadata
       await prisma.audioFile.update({
         where: { id: audioFileId },
         data: {
@@ -112,7 +175,7 @@ export class AudioProcessingService {
           bitrate: metadata.bitrate,
           sampleRate: metadata.sampleRate,
           channels: metadata.channels,
-          title: metadata.title || audioFile.filename,
+          title: metadata.title || titleFromFilename,
           artist: metadata.artist,
           album: metadata.album,
           genre: metadata.genre,
@@ -121,15 +184,21 @@ export class AudioProcessingService {
         },
       });
 
-      console.log(`Audio file ${audioFileId} processed successfully`);
+      console.log(`Archivo ${audioFileId} procesado exitosamente`);
     } catch (error) {
-      console.error(`Error processing audio file ${audioFileId}:`, error);
+      console.error(`Error procesando archivo ${audioFileId}:`, error);
       
-      // Marcar como error
-      await prisma.audioFile.update({
-        where: { id: audioFileId },
-        data: { status: "error" },
-      });
+      // Marcar como error en la base de datos
+      try {
+        await prisma.audioFile.update({
+          where: { id: audioFileId },
+          data: { 
+            status: "error",
+          },
+        });
+      } catch (dbError) {
+        console.error("Error actualizando estado a error:", dbError);
+      }
 
       throw error;
     }

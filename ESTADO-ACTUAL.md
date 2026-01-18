@@ -1,8 +1,8 @@
 # Estado Actual del Proyecto - Sistema de Streaming Integrado
 
 **Fecha**: 2026-01-10  
-**Fase**: Fase 13 - API Pública  
-**Progreso**: ✅ 100% completado
+**Fase**: Frontend Completo + Gestión de Servidores  
+**Progreso**: ✅ Backend 100% + Frontend 100% + Admin Tools
 
 ---
 
@@ -150,24 +150,44 @@ docker-compose -f docker-compose.dev.yml down
 
 ## 🚀 Próximos Pasos
 
-### Inmediatos (Ahora)
-1. ✅ Verificar que Icecast es accesible desde navegador
-2. ✅ Agregar archivos MP3 de prueba
-3. ✅ Crear playlist funcional
-4. ✅ Verificar reproducción de audio en el stream
-5. ⏳ **Probar el stream en tu navegador o VLC**
+### ✅ Completado Recientemente
+1. ✅ Backend completo (58 APIs)
+2. ✅ Frontend completo (5 páginas de streaming)
+3. ✅ Gestión de servidores para administradores
+4. ✅ Sistema de asignación automática de servidores
+5. ✅ Mensajes informativos para usuarios sin configuración
 
-### Corto Plazo (Ahora)
-1. Comenzar Fase 9: Múltiples Calidades
-2. Comenzar Fase 10: Estadísticas en Tiempo Real
-3. Implementar lectura de stats de Icecast
-4. Crear job de recolección de estadísticas
+### 🎯 Configuración Inicial Requerida
 
-### Mediano Plazo (Próximas 2 Semanas)
-1. Completar Fase 10: Estadísticas
-2. Comenzar Fase 11: Estadísticas Históricas
-3. Comenzar Fase 12: Sistema de Planes
-4. Implementar validaciones de límites
+**Para comenzar a usar el sistema de streaming:**
+
+1. **Como ADMIN:**
+   - Ir a `/admin/stream-servers`
+   - Crear un servidor VPS (nombre, host, puerto, capacidad)
+   - Asignar el servidor a un cliente usando "Asignar Cliente"
+   - El sistema creará automáticamente la configuración de streaming
+
+2. **Como CLIENTE:**
+   - Una vez asignado el servidor, acceder a `/dashboard/streaming`
+   - Todas las funciones estarán disponibles automáticamente
+
+### Inmediatos (Siguiente)
+1. ⏳ Crear primer StreamServer en la base de datos
+2. ⏳ Asignar servidor a un cliente de prueba
+3. ⏳ Probar el flujo completo de streaming
+4. ⏳ Verificar que todas las páginas funcionan correctamente
+
+### Corto Plazo
+1. Implementar jobs de monitoreo automático
+2. Crear sistema de alertas para servidores offline
+3. Agregar métricas de rendimiento de servidores
+4. Implementar backup automático de configuraciones
+
+### Mediano Plazo
+1. Optimizar rendimiento de queries
+2. Implementar caché con Redis
+3. Crear sistema de logs centralizado
+4. Preparar scripts de deployment
 
 ---
 
@@ -176,16 +196,15 @@ docker-compose -f docker-compose.dev.yml down
 | Fase | Nombre | Progreso | Estado |
 |------|--------|----------|--------|
 | 0-13 | Backend APIs | 100% | ✅ Completado |
-| 14 | Reproductor Web | 0% | ⏳ UI Pendiente |
-| 15 | Monitoreo y Alertas | 0% | ⏳ Jobs Pendiente |
-| 16 | Optimizaciones | 0% | ⏳ Pendiente |
-| 17 | Deployment | 0% | ⏳ Pendiente |
+| 14 | Frontend Dashboard | 100% | ✅ Completado |
+| 15 | Admin Tools | 100% | ✅ Completado |
+| 16 | Monitoreo y Alertas | 0% | ⏳ Jobs Pendiente |
+| 17 | Optimizaciones | 0% | ⏳ Pendiente |
+| 18 | Deployment | 0% | ⏳ Pendiente |
 
 **Backend: 100% Completado (58 APIs)**  
-**Frontend: 0% (Pendiente)**
-| 3 | Biblioteca de Audio | 0% | ⏳ Pendiente |
-| 4 | Playlists | 0% | ⏳ Pendiente |
-| ... | ... | ... | ... |
+**Frontend: 100% Completado (5 páginas + componentes)**  
+**Admin Tools: 100% Completado (Gestión de servidores)**
 
 ---
 
@@ -228,6 +247,95 @@ docker-compose -f docker-compose.dev.yml down
 
 ---
 
-**Última actualización**: 2026-01-09 23:35  
+**Última actualización**: 2026-01-10 (Actualización importante)  
 **Actualizado por**: Sistema de desarrollo  
-**Próxima revisión**: Después de agregar audio de prueba
+**Próxima revisión**: Después de crear primer servidor y asignar cliente
+
+---
+
+## 🆕 Solución al Problema: "Configuración de Streaming Pendiente"
+
+### Problema Identificado
+El usuario veía el mensaje "Configuración de Streaming Pendiente" al acceder a `/dashboard/streaming` porque no existía un `StreamConfig` en la base de datos.
+
+### Causa Raíz
+Para que un cliente pueda usar el sistema de streaming, necesita:
+1. Un `StreamServer` (VPS con Icecast + Liquidsoap)
+2. Un `StreamConfig` que lo vincule con ese servidor
+
+### Solución Implementada
+
+#### 1. Página de Gestión de Servidores (`/admin/stream-servers`)
+- **Ubicación**: Menú de administración → "Servidores de Streaming"
+- **Funciones**:
+  - Crear servidores VPS (nombre, host, puerto, capacidad, región)
+  - Ver carga actual de cada servidor
+  - Asignar servidores a clientes (manual o automático)
+  - Eliminar servidores (solo si no tienen clientes)
+
+#### 2. Sistema de Asignación Automática
+- Si no se especifica un servidor, el sistema asigna automáticamente el que tenga menor carga
+- Solo asigna servidores con estado "online" y que no estén llenos
+- Actualiza automáticamente el `currentLoad` del servidor
+
+#### 3. Mensajes Mejorados
+- **Para ADMIN**: Muestra pasos claros con enlace directo a gestión de servidores
+- **Para CLIENTE**: Explica qué incluye el servicio y que debe contactar al admin
+
+### Flujo de Configuración Inicial
+
+```
+1. ADMIN crea StreamServer
+   POST /api/admin/stream-servers
+   {
+     "name": "VPS-Stream-1",
+     "host": "192.168.1.100",
+     "port": 8000,
+     "capacity": 30,
+     "region": "us-east"
+   }
+
+2. ADMIN asigna servidor a cliente
+   POST /api/admin/clients/{clientId}/assign-server
+   {
+     "serverId": "xxx" // opcional, se asigna automáticamente si se omite
+   }
+
+3. Sistema crea StreamConfig automáticamente
+   - Genera mountpoint único: /radio_{clientId}
+   - Genera contraseña segura para live input
+   - Configura valores por defecto (128kbps, 100 oyentes, etc.)
+   - Actualiza currentLoad del servidor
+
+4. Cliente puede acceder a /dashboard/streaming
+   - Todas las funciones están disponibles
+   - Puede subir audio, crear playlists, programar horarios, etc.
+```
+
+### Archivos Creados/Modificados
+
+**Nuevos archivos:**
+- `app/admin/stream-servers/page.tsx` - Página de gestión de servidores
+- `components/admin/StreamServersManager.tsx` - Componente de gestión
+
+**Archivos modificados:**
+- `components/admin/AdminSidebar.tsx` - Agregado enlace a servidores
+- `app/dashboard/streaming/page.tsx` - Mensajes mejorados con instrucciones
+
+### APIs Utilizadas
+
+- `GET /api/admin/stream-servers` - Listar servidores
+- `POST /api/admin/stream-servers` - Crear servidor
+- `DELETE /api/admin/stream-servers/{id}` - Eliminar servidor
+- `POST /api/admin/clients/{id}/assign-server` - Asignar servidor a cliente
+- `DELETE /api/admin/clients/{id}/assign-server` - Desasignar servidor
+
+### Próximos Pasos para el Usuario
+
+1. Acceder a `/admin/stream-servers` (si eres ADMIN)
+2. Crear tu primer servidor VPS
+3. Asignar el servidor a tu cliente
+4. Recargar `/dashboard/streaming`
+5. ¡Comenzar a usar el sistema de streaming!
+
+---

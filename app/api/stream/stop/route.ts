@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { LiquidsoapService } from "@/lib/services/liquidsoap";
+import { ScriptManager } from "@/lib/services/scriptManager";
+import path from "path";
 
 // POST /api/stream/stop - Detener AutoDJ
 export async function POST(req: NextRequest) {
@@ -44,19 +45,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Actualizar estado a inactivo
-    await prisma.streamConfig.update({
-      where: { clientId },
-      data: { status: "inactive" },
-    });
+    console.log(`Deteniendo stream para cliente ${clientId}...`);
 
-    // TODO: En producción, aquí se detendría el proceso de Liquidsoap
-    // Por ahora solo actualizamos el estado en la base de datos
+    try {
+      // 1. Eliminar script de Liquidsoap
+      console.log("Eliminando script...");
+      const scriptsDir = path.join(process.cwd(), "docker", "liquidsoap", "scripts", "clients");
+      const scriptManager = new ScriptManager(scriptsDir);
+      await scriptManager.deleteScript(clientId);
 
-    return NextResponse.json({
-      success: true,
-      message: "Stream detenido exitosamente",
-    });
+      // 2. Reiniciar Liquidsoap para descargar el script
+      console.log("Reiniciando Liquidsoap...");
+      const restarted = await scriptManager.restartLiquidsoap();
+
+      if (!restarted) {
+        throw new Error("No se pudo reiniciar Liquidsoap");
+      }
+
+      // 3. Actualizar estado a inactivo
+      await prisma.streamConfig.update({
+        where: { clientId },
+        data: { 
+          status: "inactive",
+          lastError: null,
+        },
+      });
+
+      console.log(`Stream detenido exitosamente para cliente ${clientId}`);
+
+      return NextResponse.json({
+        success: true,
+        message: "Stream detenido exitosamente",
+      });
+    } catch (stopError) {
+      console.error("Error en el proceso de detención:", stopError);
+
+      // Actualizar estado a error
+      await prisma.streamConfig.update({
+        where: { clientId },
+        data: { 
+          status: "error",
+          lastError: stopError instanceof Error ? stopError.message : "Error desconocido",
+        },
+      });
+
+      return NextResponse.json(
+        { 
+          error: "Error al detener el stream",
+          details: stopError instanceof Error ? stopError.message : "Error desconocido",
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("Error stopping stream:", error);
     return NextResponse.json(
