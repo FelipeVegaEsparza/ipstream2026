@@ -22,6 +22,13 @@ RUN echo "Cache bust: $CACHEBUST"
 
 COPY . .
 
+# Debug: Verificar que los archivos existen
+RUN ls -la components/dashboard/ || echo "components/dashboard not found"
+RUN test -f components/dashboard/PodcastCard.tsx && echo "✓ PodcastCard.tsx exists" || echo "✗ PodcastCard.tsx MISSING"
+RUN test -f components/dashboard/PodcastForm.tsx && echo "✓ PodcastForm.tsx exists" || echo "✗ PodcastForm.tsx MISSING"
+RUN test -f components/dashboard/VideocastCard.tsx && echo "✓ VideocastCard.tsx exists" || echo "✗ VideocastCard.tsx MISSING"
+RUN test -f components/dashboard/VideocastForm.tsx && echo "✓ VideocastForm.tsx exists" || echo "✗ VideocastForm.tsx MISSING"
+
 # Variables de entorno para build
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
