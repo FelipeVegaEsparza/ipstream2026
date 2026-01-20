@@ -20,6 +20,11 @@ COPY --from=deps /app/node_modules ./node_modules
 ARG CACHEBUST=1
 RUN echo "Cache bust: $CACHEBUST"
 
+# Copiar tsconfig.json primero para asegurar resolución de paths
+COPY tsconfig.json ./
+COPY next.config.js ./
+
+# Copiar el resto de archivos
 COPY . .
 
 # Debug: Verificar que los archivos existen
